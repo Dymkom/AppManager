@@ -121,8 +121,6 @@ meson install -C build
 
 By default the build bundles its helper tools: it downloads `dwarfsextract` and the `dwarfs` FUSE driver, `zsync2` and `squashfuse`, and compiles `unsquashfs` from source. This needs network access. To use the host's tools instead, pass any of `-Dbundle_dwarfs=false`, `-Dbundle_zsync=false`, `-Dbundle_squashfuse=false`, `-Dbundle_unsquashfs=false`.
 
-Run the tests with `meson test -C build`.
-
 ## CLI helpers
 
 - Open the installer window for a file: `app-manager /path/to/app.AppImage`

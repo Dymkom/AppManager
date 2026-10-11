@@ -197,33 +197,35 @@ wayland_sc_lib = static_library('wayland-security-context',
   include_directories: crypto_shim_inc
 )
 
-crypto_shim_test = executable('crypto-shim-test',
-  'tests/crypto_shim_test.c',
-  link_with: crypto_shim_lib,
-  include_directories: crypto_shim_inc,
-  dependencies: [glib_dep]
-)
-test('crypto-shim', crypto_shim_test)
+if get_option('build_tests')
+  crypto_shim_test = executable('crypto-shim-test',
+    'tests/crypto_shim_test.c',
+    link_with: crypto_shim_lib,
+    include_directories: crypto_shim_inc,
+    dependencies: [glib_dep]
+  )
+  test('crypto-shim', crypto_shim_test)
 
-core_regression_test = executable('core-regression-test',
-  core_sources + files('tests/core_regression_test.vala'),
-  dependencies: [gio_dep, gio_unix_dep, glib_dep, gmodule_dep, json_glib_dep, gee_dep, libsoup_dep, libsecret_dep],
-  link_with: [crypto_shim_lib, seccomp_filter_lib, wayland_sc_lib],
-  include_directories: crypto_shim_inc
-)
-test('core-regressions', core_regression_test,
-  env: ['GSETTINGS_SCHEMA_DIR=' + meson.current_build_dir() / 'data', 'GSETTINGS_BACKEND=memory'])
+  core_regression_test = executable('core-regression-test',
+    core_sources + files('tests/core_regression_test.vala'),
+    dependencies: [gio_dep, gio_unix_dep, glib_dep, gmodule_dep, json_glib_dep, gee_dep, libsoup_dep, libsecret_dep],
+    link_with: [crypto_shim_lib, seccomp_filter_lib, wayland_sc_lib],
+    include_directories: crypto_shim_inc
+  )
+  test('core-regressions', core_regression_test,
+    env: ['GSETTINGS_SCHEMA_DIR=' + meson.current_build_dir() / 'data', 'GSETTINGS_BACKEND=memory'])
 
-workflow_driver = executable('sandbox-workflow-driver',
-  core_sources + files('tests/sandbox_workflow_driver.vala'),
-  dependencies: [gio_dep, gio_unix_dep, glib_dep, gmodule_dep, json_glib_dep, gee_dep, libsoup_dep, libsecret_dep],
-  link_with: [crypto_shim_lib, seccomp_filter_lib, wayland_sc_lib],
-  include_directories: crypto_shim_inc
-)
+  workflow_driver = executable('sandbox-workflow-driver',
+    core_sources + files('tests/sandbox_workflow_driver.vala'),
+    dependencies: [gio_dep, gio_unix_dep, glib_dep, gmodule_dep, json_glib_dep, gee_dep, libsoup_dep, libsecret_dep],
+    link_with: [crypto_shim_lib, seccomp_filter_lib, wayland_sc_lib],
+    include_directories: crypto_shim_inc
+  )
 
-python = find_program('python3')
-test('network-info-proxy', python,
-  args: [files('tests/network_info_proxy_test.py'), core_regression_test], timeout: 30)
+  python = find_program('python3')
+  test('network-info-proxy', python,
+    args: [files('tests/network_info_proxy_test.py'), core_regression_test], timeout: 30)
+endif
 
 # Fetch and install DwarFS tools if requested and supported
 if bundle_dwarfs and dwarfs_arch != ''
@@ -286,6 +288,8 @@ subdir('data')
 subdir('po')
 subdir('src')
 
-test('sandbox-lifecycle', python,
-  args: [files('tests/sandbox_lifecycle_test.py'), app_executable, workflow_driver], timeout: 90,
-  env: ['APP_MANAGER_TEST_SECCOMP=' + (seccomp_dep.found() ? '1' : '0')])
+if get_option('build_tests')
+  test('sandbox-lifecycle', python,
+    args: [files('tests/sandbox_lifecycle_test.py'), app_executable, workflow_driver], timeout: 90,
+    env: ['APP_MANAGER_TEST_SECCOMP=' + (seccomp_dep.found() ? '1' : '0')])
+endif

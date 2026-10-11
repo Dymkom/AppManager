@@ -105,6 +105,7 @@ echo "---------------------------------------------------------------"
 # Use a separate build dir to avoid conflicts with the host build/
 rm -rf build-anyimage
 meson setup build-anyimage --prefix=/usr \
+    -Dbuild_tests=false \
     -Dbundle_dwarfs=true \
     -Dbundle_zsync=true \
     -Dbundle_unsquashfs=false

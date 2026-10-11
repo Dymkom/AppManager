@@ -293,7 +293,7 @@ namespace AppManager {
             links_group.description = _("Browse these sources to discover and download AppImages");
 
             var apphub_row = new Adw.ActionRow();
-            apphub_row.title = "<b>AppHub</b>";
+            apphub_row.title = "<b>%s</b>".printf(GLib.Markup.escape_text(_("AppHub (Recommended)")));
             apphub_row.subtitle = "xlc-dev.github.io/apphub";
             apphub_row.activatable = true;
             apphub_row.add_suffix(new Gtk.Image.from_icon_name("external-link-symbolic"));
