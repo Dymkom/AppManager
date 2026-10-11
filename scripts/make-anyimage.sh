@@ -99,6 +99,13 @@ else
     /tmp/get-debloated-pkgs.sh --add-common --prefer-nano
 fi
 
+# The debloated gtk4 can lag behind the repo libadwaita (aarch64 gtk4-mini
+# 4.22.5 vs libadwaita needing >= 4.23.1). Fall back to the repo gtk4 then.
+if ! pkg-config --exists libadwaita-1; then
+    echo "Debloated gtk4 too old for libadwaita, reinstalling repo gtk4..."
+    pacman -S --noconfirm gtk4
+fi
+
 # ── Build and install app-manager ────────────────────────────────────
 echo "Building app-manager..."
 echo "---------------------------------------------------------------"
