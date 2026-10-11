@@ -292,6 +292,16 @@ namespace AppManager {
             links_group.title = _("Find more AppImages");
             links_group.description = _("Browse these sources to discover and download AppImages");
 
+            var apphub_row = new Adw.ActionRow();
+            apphub_row.title = "<b>AppHub</b>";
+            apphub_row.subtitle = "xlc-dev.github.io/apphub";
+            apphub_row.activatable = true;
+            apphub_row.add_suffix(new Gtk.Image.from_icon_name("external-link-symbolic"));
+            apphub_row.activated.connect(() => {
+                UiUtils.open_url("https://xlc-dev.github.io/apphub/");
+            });
+            links_group.add(apphub_row);
+
             var pkgforge_row = new Adw.ActionRow();
             pkgforge_row.title = "Anylinux AppImages";
             pkgforge_row.subtitle = "pkgforge-dev.github.io";
