@@ -570,26 +570,50 @@ namespace AppManager {
             return a.name.collate(b.name);
         }
 
+        private Gtk.Box build_app_name_box(Gtk.Label name_label, bool sandboxed) {
+            var name_box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 6);
+            if (sandboxed) name_box.append(UiUtils.sandbox_indicator());
+            name_box.append(name_label);
+            return name_box;
+        }
+
         private void populate_group(Adw.PreferencesGroup group, Gee.ArrayList<InstallationRecord> records) {
             foreach (var record in records) {
                 var row = new Adw.ActionRow();
-                row.title = record.name;
+                row.update_property(Gtk.AccessibleProperty.LABEL, record.name, -1);
                 if (record.mode == InstallMode.EXTRACTED) {
                     row.add_css_class("extracted-app");
                 }
                 
-                row.subtitle = build_row_subtitle(record);
-
                 var icon_image = record.icon_path != null && record.icon_path.strip() != ""
                     ? UiUtils.load_app_icon(record.icon_path) : null;
                 if (icon_image == null) {
                     icon_image = new Gtk.Image.from_icon_name("application-x-executable-symbolic");
                     icon_image.pixel_size = 48;
                 }
-                var icon_box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 6);
-                icon_box.append(icon_image);
-                if (record.sandbox_enabled()) icon_box.append(UiUtils.sandbox_indicator());
-                row.add_prefix(icon_box);
+                var name_label = new Gtk.Label(record.name);
+                name_label.xalign = 0;
+                name_label.ellipsize = Pango.EllipsizeMode.END;
+                var name_box = build_app_name_box(name_label, record.sandbox_enabled());
+                name_box.add_css_class("title");
+
+                var text_box = new Gtk.Box(Gtk.Orientation.VERTICAL, 0);
+                text_box.valign = Gtk.Align.CENTER;
+                text_box.append(name_box);
+
+                var subtitle = build_row_subtitle(record);
+                if (subtitle != "") {
+                    var subtitle_label = new Gtk.Label(subtitle);
+                    subtitle_label.xalign = 0;
+                    subtitle_label.ellipsize = Pango.EllipsizeMode.END;
+                    subtitle_label.add_css_class("subtitle");
+                    subtitle_label.add_css_class("dim-label");
+                    text_box.append(subtitle_label);
+                    row.update_property(Gtk.AccessibleProperty.DESCRIPTION, subtitle, -1);
+                }
+                row.add_prefix(text_box);
+                // add_prefix prepends, so add the icon last to keep it first.
+                row.add_prefix(icon_image);
 
                 // Make row activatable to show detail page
                 row.activatable = true;
@@ -700,11 +724,7 @@ namespace AppManager {
                 overlay.add_overlay(warn_icon);
             }
 
-            var icon_box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 6);
-            icon_box.halign = Gtk.Align.CENTER;
-            icon_box.append(overlay);
-            if (record.sandbox_enabled()) icon_box.append(UiUtils.sandbox_indicator());
-            cell_box.append(icon_box);
+            cell_box.append(overlay);
 
             // App name label (same size as list view)
             var name_label = new Gtk.Label(record.name ?? _("Unknown"));
@@ -712,7 +732,9 @@ namespace AppManager {
             name_label.set_max_width_chars(16);
             name_label.set_justify(Gtk.Justification.CENTER);
             name_label.set_halign(Gtk.Align.CENTER);
-            cell_box.append(name_label);
+            var name_box = build_app_name_box(name_label, record.sandbox_enabled());
+            name_box.halign = Gtk.Align.CENTER;
+            cell_box.append(name_box);
 
             // Size line
             var size_text = format_record_size(record);
@@ -757,12 +779,9 @@ namespace AppManager {
                 var mask = keyboard.get_modifier_state();
                 if (Gdk.ModifierType.SHIFT_MASK in mask) {
                     // Launch the app with icon spin animation
-                    var icon_overlay = cell_box.get_first_child();
-                    if (icon_overlay != null) {
-                        var icon_widget = icon_overlay.get_first_child();
-                        if (icon_widget != null) {
-                            UiUtils.spin_launch_icon(icon_widget);
-                        }
+                    var icon_widget = cell_box.get_first_child();
+                    if (icon_widget != null) {
+                        UiUtils.spin_launch_icon(icon_widget);
                     }
                     launch_app(record);
                     return;
