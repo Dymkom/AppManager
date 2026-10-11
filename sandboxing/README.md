@@ -33,6 +33,31 @@ To enable sandboxing for new non-store apps or grant a folder to all sandboxed
 apps, open **Preferences → Security & Privacy**. Global folder grants and Special
 permissions supplement every profile, including Strict.
 
+## Always-shared appearance files
+
+To keep apps looking like your desktop, these 15 hidden paths in your real home
+folder (`~/`) are **always shared read-only when present**, in every sandbox
+profile, including Strict. This access has no switch; it does not share all hidden
+files or your whole home folder.
+
+```text
+~/.config/gtk-3.0
+~/.config/gtk-4.0
+~/.config/dconf
+~/.config/fontconfig
+~/.config/Kvantum
+~/.config/qt5ct
+~/.config/qt6ct
+~/.local/share/icons
+~/.local/share/themes
+~/.local/share/fonts
+~/.gtkrc-2.0
+~/.themes
+~/.icons
+~/.fonts
+~/.local/share/gnome-shell/extensions
+```
+
 ## Apps installed from AppHub
 
 Downloads matching [AppHub](https://xlc-dev.github.io/apphub/)'s catalog receive

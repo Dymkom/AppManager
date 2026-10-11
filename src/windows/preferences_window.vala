@@ -381,6 +381,11 @@ namespace AppManager {
             var warning_icon = new Gtk.Image.from_icon_name("dialog-warning-symbolic");
             warning_icon.add_css_class("warning");
             warning_row.add_prefix(warning_icon);
+            warning_row.add_suffix(new Gtk.Image.from_icon_name("go-next-symbolic"));
+            warning_row.activatable = true;
+            warning_row.activated.connect(() => {
+                this.push_subpage(build_sandbox_info_page());
+            });
             sandbox_group.add(warning_row);
 
             var default_sandbox_row = new Adw.SwitchRow();
@@ -439,6 +444,61 @@ namespace AppManager {
             toolbar.add_top_bar(new Adw.HeaderBar());
             toolbar.set_content(page);
             return new Adw.NavigationPage(toolbar, _("Security & Privacy"));
+        }
+
+        private Adw.NavigationPage build_sandbox_info_page() {
+            string[] shared_paths = {
+                "~/.config/gtk-3.0", "~/.config/gtk-4.0", "~/.config/dconf", "~/.config/fontconfig",
+                "~/.config/Kvantum", "~/.config/qt5ct", "~/.config/qt6ct",
+                "~/.local/share/icons", "~/.local/share/themes", "~/.local/share/fonts",
+                "~/.gtkrc-2.0", "~/.themes", "~/.icons", "~/.fonts", "~/.local/share/gnome-shell/extensions"
+            };
+            var content = new Gtk.Box(Gtk.Orientation.VERTICAL, 16);
+            content.margin_top = 24;
+            content.margin_bottom = 24;
+            content.margin_start = 24;
+            content.margin_end = 24;
+
+            var explanation = new Gtk.Label(null);
+            explanation.set_markup(
+                Markup.escape_text(_("Sandboxing gives each app a private home and limits file, device and desktop-service access. It is not a safety guarantee: broad grants weaken isolation, sound includes microphone access, and X11 can expose other apps' input and windows. Apps may need reconfiguration or fail; inaccessible files, browser links and remote folders may not work.")) +
+                " <a href=\"https://github.com/kem-a/AppManager/blob/main/sandboxing/README.md\">" +
+                Markup.escape_text(_("Learn more...")) + "</a>");
+            explanation.xalign = 0;
+            explanation.wrap = true;
+            content.append(explanation);
+
+            var list_heading = new Gtk.Label(_("These 15 hidden paths in your home are always shared read-only when present:"));
+            list_heading.xalign = 0;
+            list_heading.wrap = true;
+            content.append(list_heading);
+
+            var paths = new Gtk.Label(string.joinv("\n", shared_paths));
+            paths.xalign = 0;
+            paths.wrap = true;
+            paths.wrap_mode = Pango.WrapMode.WORD_CHAR;
+            paths.selectable = true;
+            paths.add_css_class("monospace");
+            paths.add_css_class("caption");
+            content.append(paths);
+
+            var scrolled = new Gtk.ScrolledWindow();
+            scrolled.hscrollbar_policy = Gtk.PolicyType.NEVER;
+            scrolled.child = content;
+
+            var toolbar = new Adw.ToolbarView();
+            toolbar.add_top_bar(new Adw.HeaderBar());
+            toolbar.content = scrolled;
+            var page = new Adw.NavigationPage(toolbar, _("About app sandboxing"));
+            // Clear the selectable label's automatic focus after navigation.
+            page.map.connect(() => {
+                Idle.add(() => {
+                    this.set_focus(null);
+                    paths.select_region(0, 0);
+                    return Source.REMOVE;
+                });
+            });
+            return page;
         }
 
         private void reload_global_dir_rows() {
