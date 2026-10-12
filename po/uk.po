@@ -2,27 +2,27 @@
 # Copyright (C) 2026 THE app-manager'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the app-manager package.
 # Automatically generated, 2026.
+# Dymko <Dymkovych@proton.me>, 2026.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: app-manager\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-07-22 11:40+0300\n"
-"PO-Revision-Date: 2026-03-05 17:03+0100\n"
-"Last-Translator: Vsevolod «Damglador» Stopchanskyi "
-"<vse.stopchanskyi@gmail.com>\n"
-"Language-Team: none\n"
+"PO-Revision-Date: 2026-10-12 12:41+0300\n"
+"Last-Translator: Dymko <Dymkovych@proton.me>\n"
+"Language-Team: Ukrainian\n"
 "Language: uk\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
-"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
-"X-Generator: Poedit 3.8\n"
+"Plural-Forms: nplurals=4; plural=n==1 ? 3 : n%10==1 && n%100!=11 ? 0 : "
+"n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"X-Generator: Gtranslator 50.0\n"
 
 #: src/application.vala:312
 msgid "Cannot install from this location"
-msgstr ""
+msgstr "Звідси неможливо встановити"
 
 #: src/application.vala:313
 #, c-format
@@ -30,6 +30,8 @@ msgid ""
 "This AppImage is already inside the install folder (%s). Move it elsewhere "
 "first to install it."
 msgstr ""
+"AppImage вже у теці встановлення (%s). Щоб встановити його, перемістіть файл "
+"в інше місце."
 
 #: src/application.vala:314 src/application.vala:358 src/application.vala:370
 #: src/application.vala:1001 src/application.vala:1112
@@ -48,12 +50,12 @@ msgid ""
 "This AppImage is incompatible or corrupted. Missing required files "
 "(AppRun, .desktop, or icon)."
 msgstr ""
-"Це зображення програми несумісне або пошкоджене. Відсутні необхідні файли "
-"(AppRun, .desktop або значок)."
+"AppImage несумісний або пошкоджений. Відсутні потрібні файли "
+"(AppRun, .desktop або піктограма)."
 
 #: src/application.vala:366 src/windows/drop_window.vala:386
 msgid "unknown"
-msgstr "невідомий"
+msgstr "невідомо"
 
 #: src/application.vala:368
 msgid "Architecture Mismatch"
@@ -62,7 +64,7 @@ msgstr "Невідповідність архітектури"
 #: src/application.vala:369 src/windows/drop_window.vala:387
 #, c-format
 msgid "This app is built for %s and cannot run here"
-msgstr "Ця програма створена для %s"
+msgstr "Програму створено для %s, і тут вона не працюватиме"
 
 #: src/application.vala:460 src/windows/drop_window.vala:295
 #, c-format
@@ -74,13 +76,11 @@ msgstr "Відкрити %s?"
 msgid ""
 "Origins of %s application can not be verified. Are you sure you want to open "
 "it?"
-msgstr ""
-"Походження програми %s неможливо перевірити. Ви впевнені, що хочете її "
-"відкрити?"
+msgstr "Неможливо перевірити походження програми %s. Усе одно відкрити?"
 
 #: src/application.vala:467 src/windows/drop_window.vala:305
 msgid "Install the AppImage to add it to your applications."
-msgstr "Установіть цей AppImage, щоб додати його до своїх програм."
+msgstr "Встановіть AppImage, щоб додати його до програм."
 
 #: src/application.vala:469 src/windows/drop_window.vala:308
 msgid "Install"
@@ -107,6 +107,8 @@ msgid ""
 "An older item named \"%s\" already exists in this location. Do you want to "
 "replace it with newer one you're copying?"
 msgstr ""
+"Тут уже є старіший елемент із назвою \"%s\". Замінити його новішим, який ви "
+"копіюєте?"
 
 #: src/application.vala:497 src/windows/drop_window.vala:449
 #, c-format
@@ -114,30 +116,28 @@ msgid ""
 "A newer item named %s already exists in this location. Do you want to "
 "replace it with the older one you're copying?"
 msgstr ""
-"Новіша версія програми під назвою %s вже існує в цьому місці. Бажаєте "
-"замінити її старішою, котру ви зараз копіюєте?"
+"Тут уже є новіший елемент із назвою %s. Замінити його старішим, який ви "
+"копіюєте?"
 
 #: src/application.vala:499 src/windows/drop_window.vala:451
 #, c-format
 msgid ""
 "An item named %s already exists in this location. Do you want to replace it "
 "with one you're copying?"
-msgstr ""
-"Програма під назвою %s вже існує в цьому місці. Бажаєте замінити її тою, що "
-"ви зараз копіюєте?"
+msgstr "Тут уже є елемент із назвою %s. Замінити його тим, який ви копіюєте?"
 
 #: src/application.vala:502 src/windows/drop_window.vala:455
 #, c-format
 msgid "Installed: %s | Incoming: %s"
-msgstr "Встановлено: %s | Вхідні: %s"
+msgstr "Встановлено: %s | Отримано: %s"
 
 #: src/application.vala:508 src/windows/drop_window.vala:460
 msgid "Keep Both"
-msgstr ""
+msgstr "Залишити обидва"
 
 #: src/application.vala:509 src/windows/drop_window.vala:461
 msgid "Stop"
-msgstr "Стоп"
+msgstr "Зупинити"
 
 #: src/application.vala:510 src/windows/drop_window.vala:462
 msgid "Replace"
@@ -175,11 +175,11 @@ msgstr "Помилка встановлення"
 
 #: src/application.vala:648 src/windows/drop_window.vala:605
 msgid "Dismiss"
-msgstr "Відхилити"
+msgstr "Закрити"
 
 #: src/application.vala:763
 msgid "Leftover portable folder found"
-msgstr ""
+msgstr "Знайдено залишкову теку"
 
 #: src/application.vala:764
 #, c-format
@@ -189,20 +189,24 @@ msgid ""
 "installed while this bug was active — move anything you need out of it (e.g. "
 "AppImages under its Applications subfolder), then delete it."
 msgstr ""
+"Поруч Упорядника AppImage (%s) знайдено залишкову локальну теку. Програма не "
+"розрахована на такий режим роботи. У ній можуть бути програми, встановлені "
+"під час цієї помилки — перемістіть звідти все необхідне (програми AppImage "
+"із підтеки Applications), а потім видаліть."
 
 #: src/application.vala:766
 msgid "Ignore"
-msgstr ""
+msgstr "Ігнорувати"
 
 #: src/application.vala:767 src/core/installer.vala:1053
 #: src/core/installer.vala:1118 src/core/path_migration_service.vala:350
 #: src/windows/details_window.vala:1333 src/windows/details_window.vala:1374
 msgid "Move to Trash"
-msgstr "Перемістити в кошик"
+msgstr "Перемістити до кошика"
 
 #: src/application.vala:982
 msgid "Cannot move to trash"
-msgstr "Не вдалося перемістити в кошик"
+msgstr "Не вдалося перемістити до кошика"
 
 #: src/application.vala:983
 #, c-format
@@ -212,6 +216,9 @@ msgid ""
 "\n"
 "This action cannot be undone."
 msgstr ""
+"Не вдалося перемістити %s до кошика. Видалити остаточно?\n"
+"\n"
+"Цю дію неможливо скасувати."
 
 #: src/application.vala:986 src/core/installer.vala:1053
 #: src/core/installer.vala:1118 src/core/path_migration_service.vala:350
@@ -227,16 +234,16 @@ msgstr "Не вдалося видалити"
 #: src/application.vala:999
 #, c-format
 msgid "%s could not be removed: %s"
-msgstr "%s не вдалося видалити: %s"
+msgstr "Не вдалося вилучити %s: %s"
 
 #: src/application.vala:1007
 msgid "Deleted permanently"
-msgstr "Видалено назавжди"
+msgstr "Видалено остаточно"
 
 #: src/application.vala:1009 src/application.vala:1015
 #, c-format
 msgid "%s moved to Trash"
-msgstr "%s переміщено в кошик"
+msgstr "%s переміщено до кошика"
 
 #: src/application.vala:1010
 msgid "Undo"
@@ -252,7 +259,7 @@ msgstr "Відновлено"
 
 #: src/application.vala:1070
 msgid "Extraction is only available for portable installations."
-msgstr "Видобування доступне лише для портативних встановлень."
+msgstr "Видобуття доступне лише для самодостатніх копій програми."
 
 #: src/application.vala:1106
 msgid "Extracted for faster launch"
@@ -260,12 +267,12 @@ msgstr "Видобуто для швидшого запуску"
 
 #: src/application.vala:1109
 msgid "Extraction complete"
-msgstr "Видобування завершено"
+msgstr "Видобуття завершено"
 
 #: src/application.vala:1110
 #, c-format
 msgid "%s was extracted and will open faster."
-msgstr "%s було видобуто і відкриватиметься швидше."
+msgstr "%s видобуто, при запуску відкриватиметься швидше."
 
 #: src/application.vala:1121
 msgid "Extraction failed"
@@ -274,7 +281,7 @@ msgstr "Не вдалося видобути"
 #: src/application.vala:1122
 #, c-format
 msgid "%s could not be extracted: %s"
-msgstr "%s не вдалося видобути: %s"
+msgstr "Не вдалося видобути %s: %s"
 
 #: src/core/background_update_service.vala:296
 #: src/core/background_update_service.vala:453
@@ -285,69 +292,68 @@ msgstr "Доступні оновлення програм"
 #: src/core/background_update_service.vala:454
 #, c-format
 msgid "%d app update(s) available"
-msgstr "Доступні оновлення %d програм"
+msgstr "Є оновлення для %d програм"
 
 #: src/core/background_update_service.vala:347
 msgid "App updates failed"
-msgstr "Не вдалося оновити програму"
+msgstr "Не вдалося оновити програми"
 
 #: src/core/background_update_service.vala:348
 #, c-format
 msgid "%d app update(s) failed"
-msgstr "Не вдалося оновити %d програм"
+msgstr "Невдалих оновлень: %d"
 
 #: src/core/background_update_service.vala:369
 msgid "Open AppManager"
-msgstr "Відкрити AppManager"
+msgstr "Відкрити Упорядник"
 
 #: src/core/path_migration_service.vala:42
 msgid "Path must be absolute"
-msgstr "Шлях повинен бути абсолютним"
+msgstr "Шлях має бути абсолютним"
 
 #: src/core/path_migration_service.vala:47
 msgid "This is already the current directory"
-msgstr "Це вже поточний каталог"
+msgstr "Це вже поточна тека"
 
 #: src/core/path_migration_service.vala:56
 msgid "Directory is not writable"
-msgstr "Каталог не доступний для запису"
+msgstr "Тека недоступна для запису"
 
 #: src/core/path_migration_service.vala:59
 #, c-format
 msgid "Cannot access directory: %s"
-msgstr "Неможливо отримати доступ до каталогу: %s"
+msgstr "Немає доступу до теки: %s"
 
 #: src/core/path_migration_service.vala:63
 msgid "Path exists but is not a directory"
-msgstr "Шлях існує, але не є каталогом"
+msgstr "Шлях існує, але не є текою"
 
 #: src/core/path_migration_service.vala:69
 msgid "Invalid path"
-msgstr "Недійсний шлях"
+msgstr "Неправильний шлях"
 
 #: src/core/path_migration_service.vala:72
 msgid "Parent directory does not exist"
-msgstr "Батьківський каталог не існує"
+msgstr "Головної теки не існує"
 
 #: src/core/path_migration_service.vala:77
 msgid "Cannot create directory: parent is not writable"
-msgstr ""
-"Неможливо створити каталог: батьківський каталог не доступний для запису"
+msgstr "Неможливо створити теку: головна тека недоступна для запису"
 
 #: src/core/path_migration_service.vala:80
 #, c-format
 msgid "Cannot access parent directory: %s"
-msgstr "Не вдається отримати доступ до батьківського каталогу: %s"
+msgstr "Немає доступу до головної теки: %s"
 
 #: src/core/path_migration_service.vala:170
 #, c-format
 msgid "Failed to create directory: %s"
-msgstr "Не вдалося створити каталог: %s"
+msgstr "Не вдалося створити теку: %s"
 
 #: src/core/path_migration_service.vala:178
 #, c-format
 msgid "Failed to create extracted directory: %s"
-msgstr "Не вдалося створити розпакований каталог: %s"
+msgstr "Не вдалося створити теку для видобутого вмісту: %s"
 
 #: src/core/path_migration_service.vala:189
 #, c-format
@@ -360,12 +366,12 @@ msgid ""
 "Some apps failed to migrate:\n"
 "%s"
 msgstr ""
-"Деякі програми не вдалося перенести:\n"
+"Не вдалося перенести деякі програми:\n"
 "%s"
 
 #: src/core/updater.vala:633 src/core/updater.vala:700
 msgid "No update address configured"
-msgstr "Адресу оновлення не налаштовано"
+msgstr "Не налаштовано адресу оновлення"
 
 #: src/core/updater.vala:638 src/core/updater.vala:709
 msgid "Update source not supported"
@@ -373,12 +379,12 @@ msgstr "Джерело оновлення не підтримується"
 
 #: src/core/updater.vala:654 src/core/updater.vala:727
 msgid "Unable to read releases"
-msgstr "Неможливо прочитати випуски"
+msgstr "Не вдалося прочитати випуски"
 
 #: src/core/updater.vala:659 src/core/updater.vala:755
 #, c-format
 msgid "No matching AppImage found for %s"
-msgstr "Не знайдено відповідного AppImage для %s"
+msgstr "Для %s не знайдено відповідного AppImage"
 
 #: src/core/updater.vala:669 src/core/updater.vala:675
 #: src/core/updater.vala:739 src/core/updater.vala:747
@@ -386,7 +392,7 @@ msgstr "Не знайдено відповідного AppImage для %s"
 #: src/core/updater.vala:1556 src/core/updater.vala:1572
 #: src/core/updater.vala:1668 src/core/updater.vala:1679
 msgid "Already up to date"
-msgstr "Вже актуально"
+msgstr "Начасна версія"
 
 #: src/core/updater.vala:802 src/core/updater.vala:1748
 #: src/core/updater.vala:1847
@@ -396,7 +402,7 @@ msgstr "Оновлено до %s"
 
 #: src/core/updater.vala:812 src/core/updater.vala:814
 msgid "App identity mismatch"
-msgstr "Невідповідність ідентичності"
+msgstr "Невідповідність ідентифікатора програми"
 
 #: src/core/updater.vala:885 src/core/updater.vala:915
 msgid "Server does not provide change tracking headers"
@@ -404,7 +410,7 @@ msgstr "Сервер не надає заголовків відстеження
 
 #: src/core/updater.vala:893
 msgid "Baseline recorded"
-msgstr "Базовий рівень записаний"
+msgstr "Базовий рівень збережено"
 
 #: src/core/updater.vala:955 src/core/updater.vala:1749
 #: src/core/updater.vala:1848
@@ -413,7 +419,7 @@ msgstr "Оновлено"
 
 #: src/core/updater.vala:1070 src/core/updater.vala:1078
 msgid "Downloaded file is not a valid AppImage"
-msgstr "Завантажений файл не є дійсним AppImage"
+msgstr "Завантажений файл не є коректним AppImage"
 
 #: src/core/updater.vala:1081
 #, c-format
@@ -430,7 +436,7 @@ msgstr ""
 msgid ""
 "GitHub authentication failed (401). Check your token in Preferences → GitHub."
 msgstr ""
-"Помилка автентифікації GitHub (401). Перевірте свій токен у Налаштування → "
+"Помилка автентифікації GitHub (401). Перевірте токен у Налаштуваннях → "
 "GitHub."
 
 #: src/core/updater.vala:1178
@@ -438,15 +444,14 @@ msgid ""
 "GitHub API rate limit exceeded. Add a token in Preferences → GitHub to "
 "increase your limit."
 msgstr ""
-"Перевищено ліміт швидкості GitHub API. Щоб збільшити ліміт, додайте токен у "
-"Налаштування → GitHub."
+"Перевищено ліміт запитів до GitHub API. Додайте токен у Налаштуваннях → "
+"GitHub, щоб його збільшити."
 
 #: src/core/updater.vala:1180
 msgid ""
 "GitHub access forbidden (403). Your token may lack the required permissions."
 msgstr ""
-"Доступ до GitHub заборонено (403). Ваш токен може не мати необхідних "
-"дозволів."
+"Доступ до GitHub заборонено (403). Токен може не мати потрібних дозволів."
 
 #: src/core/updater.vala:1512
 msgid "Unknown zsync source type"
@@ -466,20 +471,20 @@ msgstr "Невідоме джерело zsync"
 
 #: src/core/updater.vala:1801
 msgid "Cannot determine download URL from zsync URL"
-msgstr "Не вдається визначити URL-адресу завантаження з URL-адреси zsync"
+msgstr "Не вдалося визначити URL-адресу завантаження з URL-адреси zsync"
 
 #: src/windows/details_window.vala:120
 #, c-format
 msgid "⚠️ '%s' is not in $PATH. App will not launch from the terminal"
-msgstr "⚠️ '%s' не в $PATH. Програма не запуститься з терміналу"
+msgstr "⚠️ '%s' не в $PATH. Програма не запускатиметься з термінала"
 
 #: src/windows/details_window.vala:246 src/windows/drop_window.vala:712
 msgid "Show in Files"
-msgstr "Показати у файлах"
+msgstr "Показати у Файлах"
 
 #: src/windows/details_window.vala:248
 msgid "Portable"
-msgstr "Портативний"
+msgstr "Самодостатня"
 
 #: src/windows/details_window.vala:248
 msgid "Extracted"
@@ -491,19 +496,19 @@ msgstr "Версія"
 
 #: src/windows/details_window.vala:278
 msgid "Terminal"
-msgstr "Термінальний"
+msgstr "Термінал"
 
 #: src/windows/details_window.vala:286
 msgid "This app supports efficient delta updates"
-msgstr "Ця програма підтримує ефективні дельта-оновлення"
+msgstr "Програма підтримує ефективні дельта-оновлення"
 
 #: src/windows/details_window.vala:293
 msgid "Hidden"
-msgstr "Прихований"
+msgstr "Приховано"
 
 #: src/windows/details_window.vala:304
 msgid "Web"
-msgstr ""
+msgstr "Веб"
 
 #: src/windows/details_window.vala:323
 msgid "Properties"
@@ -515,27 +520,27 @@ msgstr "Аргументи командного рядка"
 
 #: src/windows/details_window.vala:366 src/windows/details_window.vala:420
 msgid "App Updates"
-msgstr ""
+msgstr "Оновлення"
 
 #: src/windows/details_window.vala:367
 msgid "Edit app update details"
-msgstr ""
+msgstr "Параметри оновлення"
 
 #: src/windows/details_window.vala:369 src/windows/details_window.vala:413
 msgid "On"
-msgstr ""
+msgstr "Увімкнено"
 
 #: src/windows/details_window.vala:369 src/windows/details_window.vala:413
 msgid "Off"
-msgstr ""
+msgstr "Вимкнено"
 
 #: src/windows/details_window.vala:388
 msgid ""
 "Update info lets AppManager fetch new builds for you. Paste the download "
 "link and AppManager will do the rest."
 msgstr ""
-"Інформація про оновлення дозволяє AppManager отримувати нові збірки для вас. "
-"Вставте посилання для завантаження, а AppManager зробить усе інше."
+"Інформація про оновлення дає змогу Упоряднику отримувати нові збірки. "
+"Вставте посилання для завантаження, а програма зробить усе інше."
 
 #: src/windows/details_window.vala:389
 msgid ""
@@ -543,89 +548,89 @@ msgid ""
 "links also work if the server provides Last-Modified or Content-Length "
 "headers."
 msgstr ""
-"Наразі формати URL GitHub і GitLab повністю підтримуються. Прямі посилання "
-"для завантаження також працюють, якщо сервер надає заголовки Last-Modified "
-"або Content-Length."
+"Повністю підтримуються формати URL GitHub і GitLab. Прямі посилання для "
+"завантаження також працюють, якщо сервер надає заголовки Last-Modified або "
+"Content-Length."
 
 #: src/windows/details_window.vala:391
 msgid "Update links"
-msgstr "Посилання для оновлення"
+msgstr "Джерела оновлень"
 
 #: src/windows/details_window.vala:398
 msgid "Enable app updates"
-msgstr ""
+msgstr "Увімкнути оновлення"
 
 #: src/windows/details_window.vala:424
 msgid "Update details"
-msgstr ""
+msgstr "Деталі оновлення"
 
 #: src/windows/details_window.vala:434
 msgid "Pre-release Updates"
-msgstr "Оновлення попередніх випусків"
+msgstr "Попередні випуски"
 
 #: src/windows/details_window.vala:435
 msgid "Include pre-release versions when checking for updates"
-msgstr "Включати версії попередніх випусків під час перевірки оновлень"
+msgstr "Враховувати попередні випуски під час перевірки оновлень"
 
 #: src/windows/details_window.vala:455
 msgid "Update link is managed by the embedded zsync update mechanism"
-msgstr "Посилання на оновлення керується вбудованим механізмом zsync"
+msgstr "Вбудований механізм оновлення zsync сам керує посиланням"
 
 #: src/windows/details_window.vala:489
 msgid "Update Link"
-msgstr "Посилання для оновлення"
+msgstr "Посилання на оновлення"
 
 #: src/windows/details_window.vala:545
 msgid "Web Page"
-msgstr "Веб-сторінка"
+msgstr "Вебсторінка"
 
 #: src/windows/details_window.vala:579
 msgid "Open web page"
-msgstr "Відкрити веб-сторінку"
+msgstr "Відкрити вебсторінку"
 
 #: src/windows/details_window.vala:595 src/windows/details_window.vala:628
 msgid "Advanced Settings"
-msgstr ""
+msgstr "Розширені налаштування"
 
 #: src/windows/details_window.vala:596
 msgid ""
 "Change app icon, Startup WM Class, Keywords, $PATH or environment variables"
 msgstr ""
+"Змінити піктограму програми, Startup WM Class, ключові слова, $PATH або "
+"змінні середовища"
 
 #: src/windows/details_window.vala:612
 msgid "App Settings"
-msgstr ""
+msgstr "Налаштування"
 
 #: src/windows/details_window.vala:641
-#, fuzzy
 msgid "Portable .home folder"
-msgstr "Портативний"
+msgstr "Портативна тека .home"
 
 #: src/windows/details_window.vala:642
 msgid "Store the app's home directory in a .home folder next to the AppImage"
-msgstr ""
+msgstr "Зберігати домашню теку програми в теці .home поруч із AppImage"
 
 #: src/windows/details_window.vala:643
 msgid ".home"
-msgstr ""
+msgstr ".home"
 
 #: src/windows/details_window.vala:652
-#, fuzzy
 msgid "Portable .config folder"
-msgstr "Портативний"
+msgstr "Портативна тека .config"
 
 #: src/windows/details_window.vala:653
 msgid "Store the app's config in a .config folder next to the AppImage"
-msgstr ""
+msgstr "Зберігати налаштування програми в теці .config поруч із AppImage"
 
 #: src/windows/details_window.vala:654
 msgid ".config"
-msgstr ""
+msgstr ".config"
 
 #: src/windows/details_window.vala:695
 #, c-format
 msgid "Remove portable %s folder?"
-msgstr ""
+msgstr "Видалити портативну теку %s?"
 
 #: src/windows/details_window.vala:696
 #, c-format
@@ -633,11 +638,11 @@ msgid ""
 "The %s folder next to this AppImage will be permanently removed, including "
 "any data it contains."
 msgstr ""
+"Теку %s поруч із цим AppImage буде видалено назавжди з усіма даними в ній."
 
 #: src/windows/details_window.vala:699
-#, fuzzy
 msgid "Remove Data"
-msgstr "Видалити змінну"
+msgstr "Видалити дані"
 
 #: src/windows/details_window.vala:717
 msgid "Environment Variables"
@@ -645,11 +650,11 @@ msgstr "Змінні середовища"
 
 #: src/windows/details_window.vala:718
 msgid "Set custom environment variables for this app"
-msgstr "Установіть спеціальні змінні середовища для цієї програми"
+msgstr "Встановити власні змінні середовища для цієї програми"
 
 #: src/windows/details_window.vala:780
 msgid "NAME"
-msgstr "ІМ'Я"
+msgstr "НАЗВА"
 
 #: src/windows/details_window.vala:796
 msgid "value"
@@ -661,7 +666,7 @@ msgstr "Видалити змінну"
 
 #: src/windows/details_window.vala:941
 msgid "App Name"
-msgstr ""
+msgstr "Назва програми"
 
 #: src/windows/details_window.vala:955
 msgid "Keywords"
@@ -669,7 +674,7 @@ msgstr "Ключові слова"
 
 #: src/windows/details_window.vala:965
 msgid "Icon name"
-msgstr "Назва іконки"
+msgstr "Назва піктограми"
 
 #: src/windows/details_window.vala:975
 msgid "Startup WM Class"
@@ -681,11 +686,11 @@ msgstr "Версія"
 
 #: src/windows/details_window.vala:1005
 msgid "Hide from app drawer"
-msgstr "Сховати з панелі програм"
+msgstr "Сховати з меню програм"
 
 #: src/windows/details_window.vala:1006
 msgid "Don't show in application menu"
-msgstr "Не показувати в меню програми"
+msgstr "Не показувати в меню програм"
 
 #: src/windows/details_window.vala:1019
 msgid "Add to $PATH"
@@ -694,7 +699,7 @@ msgstr "Додати до $PATH"
 #: src/windows/details_window.vala:1020
 #, c-format
 msgid "Create a launcher in %s so you can run it from the terminal"
-msgstr "Створити запускач в %s, щоб легко запускати програму з терміналу"
+msgstr "Створити запускач у %s для запуску з термінала"
 
 #: src/windows/details_window.vala:1086
 msgid "Actions"
@@ -702,7 +707,7 @@ msgstr "Дії"
 
 #: src/windows/details_window.vala:1125
 msgid "Extract AppImage"
-msgstr "Видобути AppImage"
+msgstr "Видобути"
 
 #: src/windows/details_window.vala:1165
 msgid "Restore default"
@@ -719,77 +724,77 @@ msgstr "Перевірка..."
 
 #: src/windows/details_window.vala:1199
 msgid "Update"
-msgstr "Оновлення"
+msgstr "Оновити"
 
 #: src/windows/details_window.vala:1206
 msgid "Update Failed"
-msgstr "Оновлення не вдалося"
+msgstr "Не вдалося оновити"
 
 #: src/windows/details_window.vala:1213
 msgid "Check Update"
-msgstr "Перевірте оновлення"
+msgstr "Оновити"
 
 #: src/windows/details_window.vala:1334
 msgid "Hold Shift to delete permanently"
-msgstr "Утримуйте Shift, щоб остаточно видалити"
+msgstr "Утримуйте Shift, щоб видалити остаточно"
 
 #: src/windows/details_window.vala:1341 src/windows/details_window.vala:1369
 #, c-format
 msgid "<b>%s</b> will be permanently deleted. This action cannot be undone."
-msgstr "<b>%s</b> буде назавжди видалено. Цю дію не можна скасувати."
+msgstr "<b>%s</b> буде остаточно видалено. Цю дію неможливо скасувати."
 
 #: src/windows/details_window.vala:1342 src/windows/details_window.vala:1367
 msgid "Delete permanently?"
-msgstr "Остаточно видалити?"
+msgstr "Видалити остаточно?"
 
 #: src/windows/details_window.vala:1370
 msgid "Delete All Data"
-msgstr ""
+msgstr "Видалити всі дані"
 
 #: src/windows/details_window.vala:1371
 msgid "Permanently erase user data to save space"
-msgstr ""
+msgstr "Остаточно стерти дані користувача, щоб звільнити місце"
 
 #: src/windows/details_window.vala:1373
 msgid "Move to Trash?"
-msgstr ""
+msgstr "Перемістити до кошика?"
 
 #: src/windows/details_window.vala:1375
 #, c-format
 msgid "<b>%s</b> will be moved to the Trash."
-msgstr ""
+msgstr "<b>%s</b> буде переміщено до кошика."
 
 #: src/windows/details_window.vala:1376
 msgid "Trash All Data"
-msgstr ""
+msgstr "Перемістити всі дані до кошика"
 
 #: src/windows/details_window.vala:1377
 msgid "Move user data to Trash along with the app"
-msgstr ""
+msgstr "Перемістити дані користувача до кошика разом із програмою"
 
 #: src/windows/details_window.vala:1393
 msgid "Keep User Data"
-msgstr ""
+msgstr "Зберегти дані користувача"
 
 #: src/windows/details_window.vala:1394
 msgid "Allow restoring personal settings &amp; content"
-msgstr ""
+msgstr "Дозволити відновлення особистих налаштувань і вмісту"
 
 #: src/windows/details_window.vala:1427
 msgid ""
 "Extracting will unpack the application so it opens faster, but it will "
 "consume more disk space. This action cannot be reversed automatically."
 msgstr ""
-"Витяг розпакує програму, щоб вона відкривалася швидше, але займає більше "
-"місця на диску. Цю дію не можна скасувати автоматично."
+"Видобуття розпакує програму, щоб вона відкривалася швидше, але це займе "
+"більше місця на диску. Цю дію неможливо скасувати автоматично."
 
 #: src/windows/details_window.vala:1428
 msgid "Extract application?"
-msgstr "Витягнути заявку?"
+msgstr "Розпакувати програму?"
 
 #: src/windows/details_window.vala:1430
 msgid "Extract"
-msgstr "Видобути"
+msgstr "Розпакувати"
 
 #: src/windows/dialog_window.vala:86
 msgid "App removed"
@@ -801,36 +806,36 @@ msgstr "Програму успішно видалено."
 
 #: src/windows/drop_window.vala:66 src/windows/drop_window.vala:811
 msgid "AppImage Installer"
-msgstr "Інсталятор AppImage"
+msgstr "Встановлювач AppImage"
 
 #: src/windows/drop_window.vala:111 src/windows/drop_window.vala:1206
 msgid "Verify"
-msgstr "Підтвердити"
+msgstr "Перевірити"
 
 #: src/windows/drop_window.vala:112
 msgid "Verify AppImage with SHA256 hash"
-msgstr "Перевірте AppImage за допомогою хешу SHA256"
+msgstr "Перевірити AppImage за хешем SHA256"
 
 #: src/windows/drop_window.vala:138
 msgid "SHA256 hash does not match. Verification failed."
-msgstr "Хеш SHA256 не збігається. Не вдалося перевірити."
+msgstr "Хеш SHA256 не збігається. Перевірку не пройдено."
 
 #: src/windows/drop_window.vala:169
 #, c-format
 msgid "Drag and drop to install into %s"
-msgstr "Перетягніть, щоб установити в %s"
+msgstr "Перетягніть для встановлення в %s"
 
 #: src/windows/drop_window.vala:303
 msgid "This is a terminal application and will be installed in portable mode."
-msgstr "Це термінальна програма, яку буде встановлено в портативному режимі."
+msgstr "Це термінальна програма, яка встановиться в портативному режимі."
 
 #: src/windows/drop_window.vala:376
 msgid "This AppImage is incompatible or corrupted"
-msgstr "Цей AppImage несумісний або пошкоджений"
+msgstr "AppImage несумісний або пошкоджений"
 
 #: src/windows/drop_window.vala:378
 msgid "Missing required files (AppRun, .desktop, or icon)"
-msgstr "Відсутні необхідні файли (AppRun, .desktop або значок)"
+msgstr "Відсутні потрібні файли (AppRun, .desktop або піктограма)"
 
 #: src/windows/drop_window.vala:389
 msgid "Architecture mismatch"
@@ -838,7 +843,7 @@ msgstr "Невідповідність архітектури"
 
 #: src/windows/drop_window.vala:502
 msgid "Unable to prepare AppImage for installation"
-msgstr "Неможливо підготувати AppImage до встановлення"
+msgstr "Не вдалося підготувати AppImage до встановлення"
 
 #: src/windows/drop_window.vala:546
 msgid "Successfully Replaced"
@@ -846,55 +851,55 @@ msgstr "Успішно замінено"
 
 #: src/windows/drop_window.vala:708
 msgid "Get Info"
-msgstr ""
+msgstr "Деталі"
 
 #: src/windows/drop_window.vala:709
 msgid "Copy"
-msgstr ""
+msgstr "Копіювати"
 
 #: src/windows/drop_window.vala:715
 msgid "New Terminal at Folder"
-msgstr ""
+msgstr "Відкрити термінал у цій теці"
 
 #: src/windows/drop_window.vala:1167
 msgid "Verify AppImage"
-msgstr "Перевірте AppImage"
+msgstr "Перевірити AppImage"
 
 #: src/windows/drop_window.vala:1185
 msgid "Verify the authenticity of this AppImage."
-msgstr "Перевірте автентичність цього AppImage."
+msgstr "Перевірити автентичність AppImage."
 
 #: src/windows/drop_window.vala:1191
 msgid "Enter the SHA256 hash "
-msgstr "Уведіть SHA256 хеш "
+msgstr "Уведіть хеш SHA256 "
 
 #: src/windows/main_window.vala:71 src/windows/main_window.vala:234
 msgid "AppManager"
-msgstr "AppManager"
+msgstr "Упорядник AppImage"
 
 #: src/windows/main_window.vala:196
 msgid "No Apps Yet"
-msgstr "Програм ще немає"
+msgstr "Поки що немає програм"
 
 #: src/windows/main_window.vala:200
 msgid "Import your AppImages to manage and update them here"
-msgstr "Імпортуйте ваші AppImages, щоб керувати та оновлювати їх тут"
+msgstr "Імпортуйте AppImage, щоб керувати програмами й оновлювати їх тут"
 
 #: src/windows/main_window.vala:215 src/windows/main_window.vala:388
 msgid "Import AppImages ..."
-msgstr "Імпортувати AppImages ..."
+msgstr "Імпортувати AppImages…"
 
 #: src/windows/main_window.vala:293
 msgid "Get more ..."
-msgstr "Отримати більше..."
+msgstr "Ще..."
 
 #: src/windows/main_window.vala:305
 msgid "Find more AppImages"
-msgstr "Знайдіть більше AppImages"
+msgstr "Знайти більше AppImages"
 
 #: src/windows/main_window.vala:306
 msgid "Browse these sources to discover and download AppImages"
-msgstr "Перегляньте ці джерела, щоб знайти та завантажити AppImages"
+msgstr "Перегляньте ці джерела для пошуку та завантаження AppImages"
 
 #: src/windows/main_window.vala:332
 msgid "Import AppImages from folder ..."
@@ -907,15 +912,16 @@ msgstr "Немає встановлених програм AppImage"
 #: src/windows/main_window.vala:375
 msgid "Download AppImage and double click to install with AppManager"
 msgstr ""
-"Завантажте AppImage і двічі клацніть, щоб установити за допомогою AppManager"
+"Завантажте AppImage і двічі клацніть для встановлення через Упорядник "
+"AppImage"
 
 #: src/windows/main_window.vala:463
 msgid "No results found"
-msgstr "Результатів не знайдено"
+msgstr "Нічого не знайдено"
 
 #: src/windows/main_window.vala:542 src/windows/main_window.vala:1101
 msgid "My Apps"
-msgstr "Мої програми"
+msgstr "Програми"
 
 #: src/windows/main_window.vala:640 src/windows/main_window.vala:714
 msgid "Update available"
@@ -923,16 +929,15 @@ msgstr "Доступне оновлення"
 
 #: src/windows/main_window.vala:729
 msgid "Unknown"
-msgstr "Невідомий"
+msgstr "Невідомо"
 
 #: src/windows/main_window.vala:822
 msgid "extracted"
-msgstr "видобутий"
+msgstr "видобуто"
 
 #: src/windows/main_window.vala:883
-#, fuzzy
 msgid "Imported just now"
-msgstr "Оновлено щойно"
+msgstr "Імпортовано щойно"
 
 #: src/windows/main_window.vala:883
 msgid "Updated just now"
@@ -940,56 +945,56 @@ msgstr "Оновлено щойно"
 
 #: src/windows/main_window.vala:883
 msgid "Installed just now"
-msgstr "Встановив щойно"
+msgstr "Встановлено щойно"
 
 #: src/windows/main_window.vala:891
-#, fuzzy, c-format
+#, c-format
 msgid "Imported %d min ago"
-msgstr "Оновлено %d хвилин тому"
+msgstr "Імпортовано %d хв тому"
 
 #: src/windows/main_window.vala:891
 #, c-format
 msgid "Updated %d min ago"
-msgstr "Оновлено %d хвилин тому"
+msgstr "Оновлено %d хв тому"
 
 #: src/windows/main_window.vala:891
 #, c-format
 msgid "Installed %d min ago"
-msgstr "Встановлено %d хвилин тому"
+msgstr "Встановлено %d хв тому"
 
 #: src/windows/main_window.vala:899
-#, fuzzy, c-format
+#, c-format
 msgid "Imported %d hours ago"
-msgstr "Оновлено %d годин тому"
+msgstr "Імпортовано %d год тому"
 
 #: src/windows/main_window.vala:899
 #, c-format
 msgid "Updated %d hours ago"
-msgstr "Оновлено %d годин тому"
+msgstr "Оновлено %d год тому"
 
 #: src/windows/main_window.vala:899
 #, c-format
 msgid "Installed %d hours ago"
-msgstr "Установлено %d годин тому"
+msgstr "Встановлено %d год тому"
 
 #: src/windows/main_window.vala:906
-#, fuzzy, c-format
+#, c-format
 msgid "Imported %d days ago"
-msgstr "Оновлено %d днів тому"
+msgstr "Імпортовано %d дн. тому"
 
 #: src/windows/main_window.vala:906
 #, c-format
 msgid "Updated %d days ago"
-msgstr "Оновлено %d днів тому"
+msgstr "Оновлено %d дн. тому"
 
 #: src/windows/main_window.vala:906
 #, c-format
 msgid "Installed %d days ago"
-msgstr "Встановлено %d днів тому"
+msgstr "Встановлено %d дн. тому"
 
 #: src/windows/main_window.vala:925 src/windows/main_window.vala:1284
 msgid "Leave Fullscreen"
-msgstr "Вийти з повноекранного режиму"
+msgstr "Віконний режим"
 
 #: src/windows/main_window.vala:925 src/windows/main_window.vala:1284
 msgid "Fullscreen"
@@ -1001,11 +1006,11 @@ msgstr "Налаштування"
 
 #: src/windows/main_window.vala:931
 msgid "Keyboard shortcuts"
-msgstr "Комбінації клавіш"
+msgstr "Клавіатурні скорочення"
 
 #: src/windows/main_window.vala:932 src/windows/main_window.vala:1895
 msgid "About AppManager"
-msgstr "Про AppManager"
+msgstr "Про програму"
 
 #: src/windows/main_window.vala:936
 msgid "Quit"
@@ -1013,27 +1018,27 @@ msgstr "Вийти"
 
 #: src/windows/main_window.vala:950
 msgid "Support AppManager"
-msgstr "Підтримка AppManager"
+msgstr "Підтримати розробку"
 
 #: src/windows/main_window.vala:965
 msgid "Buy Me a Coffee"
-msgstr "Купи мені каву"
+msgstr "Купи мені кави"
 
 #: src/windows/main_window.vala:984
 msgid "Become a sponsor on GitHub"
-msgstr "Станьте спонсором GitHub"
+msgstr "Стати спонсором на GitHub"
 
 #: src/windows/main_window.vala:989
 msgid "Sponsor Me ♡"
-msgstr "Підтримайте мене ♡"
+msgstr "Підтримати мене ♡"
 
 #: src/windows/main_window.vala:1000
 msgid "Star AppManager on GitHub"
-msgstr "Зірка AppManager на GitHub"
+msgstr "Поставити зірку на GitHub"
 
 #: src/windows/main_window.vala:1005
 msgid "Star AppManager"
-msgstr "Зірочка AppManager"
+msgstr "Зірочку проєкту"
 
 #: src/windows/main_window.vala:1016
 msgid "View contributors on GitHub"
@@ -1041,7 +1046,7 @@ msgstr "Перегляньте співавторів на GitHub"
 
 #: src/windows/main_window.vala:1021 src/windows/main_window.vala:1914
 msgid "Contributors"
-msgstr "Вкладники"
+msgstr "Співучасники"
 
 #: src/windows/main_window.vala:1044 src/windows/main_window.vala:1893
 msgid "Search"
@@ -1049,11 +1054,11 @@ msgstr "Пошук"
 
 #: src/windows/main_window.vala:1050
 msgid "Support this project"
-msgstr "Підтримайте цей проект"
+msgstr "Підтримати проєкт"
 
 #: src/windows/main_window.vala:1060
 msgid "More actions"
-msgstr "Більше дій"
+msgstr "Інші дії"
 
 #: src/windows/main_window.vala:1075
 msgid "Search apps..."
@@ -1061,51 +1066,51 @@ msgstr "Пошук програм..."
 
 #: src/windows/main_window.vala:1083
 msgid "FUSE is not installed. Some AppImages may fail to run"
-msgstr "FUSE не встановлений. Деякі AppImages можуть не працювати"
+msgstr "FUSE не встановлено. Деякі AppImages можуть не запуститися"
 
 #: src/windows/main_window.vala:1085
 msgid "Learn More"
-msgstr "Дізнайтеся більше"
+msgstr "Дізнатися більше"
 
 #: src/windows/main_window.vala:1106
 msgid "Shift+click to launch app"
-msgstr "Shift+Клац, щоб запустити програму"
+msgstr "Shift+Клік для запуску програми"
 
 #: src/windows/main_window.vala:1118
 msgid "Sort apps"
-msgstr ""
+msgstr "Сортувати програми"
 
 #: src/windows/main_window.vala:1147
 msgid "Switch to grid view"
-msgstr "Перейти в режим сітки"
+msgstr "Плитками"
 
 #: src/windows/main_window.vala:1150
 msgid "Switch to list view"
-msgstr "Переключитися на перегляд списку"
+msgstr "Списком"
 
 #: src/windows/main_window.vala:1156
 msgid "Default"
-msgstr ""
+msgstr "Типово"
 
 #: src/windows/main_window.vala:1159
 msgid "Name (A-Z)"
-msgstr ""
+msgstr "За назвою (А-Я)"
 
 #: src/windows/main_window.vala:1160
 msgid "Name (Z-A)"
-msgstr ""
+msgstr "За назвою (Я-А)"
 
 #: src/windows/main_window.vala:1164
 msgid "Size (smallest first)"
-msgstr ""
+msgstr "За розміром (від найменших)"
 
 #: src/windows/main_window.vala:1165
 msgid "Size (largest first)"
-msgstr ""
+msgstr "За розміром (від найбільших)"
 
 #: src/windows/main_window.vala:1340 src/windows/main_window.vala:1411
 msgid "Updates already running"
-msgstr "Оновлення вже запущені"
+msgstr "Оновлення вже виконується"
 
 #: src/windows/main_window.vala:1388
 msgid "Cancel update"
@@ -1117,12 +1122,12 @@ msgstr "Скасування..."
 
 #: src/windows/main_window.vala:1445
 msgid "Update check cancelled"
-msgstr "Перевірку оновлення скасовано"
+msgstr "Перевірку оновлень скасовано"
 
 #: src/windows/main_window.vala:1475
 #, c-format
 msgid "%d app(s) have updates"
-msgstr "Додатки %d мають оновлення"
+msgstr "Оновлень знайдено: %d"
 
 #: src/windows/main_window.vala:1478
 msgid "No updates available right now"
@@ -1130,7 +1135,7 @@ msgstr "Зараз немає оновлень"
 
 #: src/windows/main_window.vala:1485
 msgid "Nothing queued for updating"
-msgstr "Нічого не стоїть у черзі на оновлення"
+msgstr "Немає програм у черзі на оновлення"
 
 #: src/windows/main_window.vala:1512
 msgid "Update cancelled"
@@ -1138,7 +1143,7 @@ msgstr "Оновлення скасовано"
 
 #: src/windows/main_window.vala:1577 src/windows/main_window.vala:1597
 msgid "Update failed"
-msgstr "Оновлення не вдалося"
+msgstr "Не вдалося оновити"
 
 #: src/windows/main_window.vala:1650
 msgid "Checking updates"
@@ -1154,7 +1159,7 @@ msgstr "Оновлення програм"
 
 #: src/windows/main_window.vala:1659
 msgid "Check updates"
-msgstr "Перевірте оновлення"
+msgstr "Пошук оновлень"
 
 #: src/windows/main_window.vala:1683
 msgid "No installed apps to update"
@@ -1163,25 +1168,25 @@ msgstr "Немає встановлених програм для оновлен
 #: src/windows/main_window.vala:1723
 #, c-format
 msgid "Updated %d app(s)"
-msgstr "Оновлено програму(и): %d"
+msgstr "Оновлено програм: %d"
 
 #: src/windows/main_window.vala:1726
 #, c-format
 msgid "%d update(s) failed"
-msgstr "Не вдалося виконати %d оновлень"
+msgstr "Помилок оновлення: %d"
 
 #: src/windows/main_window.vala:1734
 msgid "Add update addresses in Details to enable updates"
-msgstr "Щоб увімкнути оновлення, додайте адреси оновлення в Деталі"
+msgstr "Щоб увімкнути оновлення, додайте посилання у вікні Деталі"
 
 #: src/windows/main_window.vala:1736
 msgid "All supported apps are already up to date"
-msgstr "Усі підтримувані програми вже оновлені"
+msgstr "Усі підтримувані програми мають останню версію"
 
 #: src/windows/main_window.vala:1740
 #, c-format
 msgid "%d app(s) use unsupported update links"
-msgstr "Додатки %d використовують непідтримувані посилання для оновлення"
+msgstr "Непідтримуваних посилань для оновлення: %d"
 
 #: src/windows/main_window.vala:1835
 #, c-format
@@ -1202,15 +1207,15 @@ msgstr "Вікно"
 
 #: src/windows/main_window.vala:1891
 msgid "Check for updates"
-msgstr "Перевірте наявність оновлень"
+msgstr "Перевірити наявність оновлень"
 
 #: src/windows/main_window.vala:1892
 msgid "Show main menu"
-msgstr "Показати головне меню"
+msgstr "Головне меню"
 
 #: src/windows/main_window.vala:1894
 msgid "Show shortcuts"
-msgstr "Показати ярлики"
+msgstr "Клавіатурні скорочення"
 
 #: src/windows/main_window.vala:1896
 msgid "Close window"
@@ -1218,23 +1223,23 @@ msgstr "Закрити вікно"
 
 #: src/windows/main_window.vala:1897
 msgid "Quit AppManager"
-msgstr "Закрийте AppManager"
+msgstr "Вийти"
 
 #: src/windows/main_window.vala:1898
 msgid "Toggle fullscreen"
-msgstr "Перемкнути повноекранний режим"
+msgstr "Повноекранний режим"
 
 #: src/windows/main_window.vala:1915
 msgid "Credits"
-msgstr "Подяки"
+msgstr "Автори"
 
 #: src/windows/main_window.vala:1999
 msgid "Select folder with AppImages"
-msgstr "Виберіть теку з AppImages"
+msgstr "Вибір теки з AppImages"
 
 #: src/windows/main_window.vala:2013
 msgid "Cannot import from this location"
-msgstr ""
+msgstr "Неможливо імпортувати з цього розташування"
 
 #: src/windows/main_window.vala:2014
 #, c-format
@@ -1242,15 +1247,17 @@ msgid ""
 "This folder is inside the install folder (%s). Select a different folder to "
 "import from."
 msgstr ""
+"Ця тека перебуває всередині теки встановлення (%s). Виберіть іншу теку для "
+"імпорту."
 
 #: src/windows/main_window.vala:2025
 msgid "Import AppImages"
-msgstr "Імпортувати AppImages"
+msgstr "Імпорт AppImages"
 
 #: src/windows/main_window.vala:2026
 #, c-format
 msgid "Install AppImages found in %s"
-msgstr "Встановити AppImages, знайдені в %s"
+msgstr "Встановити знайдені в %s AppImages"
 
 #: src/windows/main_window.vala:2028
 msgid "Move AppImages"
@@ -1258,7 +1265,7 @@ msgstr "Перемістити AppImages"
 
 #: src/windows/main_window.vala:2035
 msgid "Import"
-msgstr "Імпортувати"
+msgstr "Імпорт"
 
 #: src/windows/main_window.vala:2065
 #, c-format
@@ -1276,7 +1283,7 @@ msgstr "Імпортування AppImages…"
 #: src/windows/main_window.vala:2082
 #, c-format
 msgid "Installing %d AppImage(s)…"
-msgstr "Встановлення %d AppImage…"
+msgstr "Встановлення AppImage: %d…"
 
 #: src/windows/main_window.vala:2095
 msgid "Starting…"
@@ -1294,22 +1301,22 @@ msgstr "%d з %d: %s"
 #: src/windows/main_window.vala:2180
 #, c-format
 msgid "Imported %d app(s)"
-msgstr "Імпортовано %d програм(и)"
+msgstr "Імпортовано програм: %d"
 
 #: src/windows/main_window.vala:2183
-#, fuzzy, c-format
+#, c-format
 msgid "Skipped %d incompatible architecture app(s)"
-msgstr "Пропущено %d вже встановлених програм"
+msgstr "Пропущено програм із несумісною архітектурою: %d"
 
 #: src/windows/main_window.vala:2186
 #, c-format
 msgid "%d app(s) failed to import"
-msgstr "Не вдалося імпортувати %d програм(и)"
+msgstr "Не імпортовано програм: %d"
 
 #: src/windows/main_window.vala:2189
 #, c-format
 msgid "Cancelled — %d app(s) not imported"
-msgstr "Скасовано — %d програм не імпортовано"
+msgstr "Скасовано — не імпортовано програм: %d"
 
 #: src/windows/preferences_window.vala:59
 msgid "Installation"
@@ -1317,71 +1324,71 @@ msgstr "Встановлення"
 
 #: src/windows/preferences_window.vala:60
 msgid "Configure where AppImages are installed (default: ~/Applications)"
-msgstr "Налаштувати місце встановлення AppImages (стандартно: ~/Applications)"
+msgstr "Налаштувати місце встановлення AppImages (типово: ~/Applications)"
 
 #: src/windows/preferences_window.vala:63
 msgid "Installation directory"
-msgstr "Каталог встановлення"
+msgstr "Тека встановлення"
 
 #: src/windows/preferences_window.vala:78
 msgid "Browse for folder"
-msgstr "Перегляньте папку"
+msgstr "Вибрати теку"
 
 #: src/windows/preferences_window.vala:86
 msgid "Reset to default"
-msgstr "Скинути до замовчування"
+msgstr "Скинути налаштування"
 
 #: src/windows/preferences_window.vala:96
 msgid "Apply changes"
-msgstr "Застосувати зміни"
+msgstr "Застосувати"
 
 #: src/windows/preferences_window.vala:107
 msgid "Skip drag-and-drop window"
-msgstr "Пропустити вікно перетягування"
+msgstr "Пропускати вікно перетягування"
 
 #: src/windows/preferences_window.vala:108
 msgid "Show install dialog directly when opening AppImages"
-msgstr ""
-"Відображати діалогове вікно встановлення безпосередньо під час відкриття "
-"AppImages"
+msgstr "Одразу показувати вікно встановлення під час відкриття AppImage"
 
 #: src/windows/preferences_window.vala:112
 msgid "Portable .home by default"
-msgstr ""
+msgstr "Автономна тека .home стандартно"
 
 #: src/windows/preferences_window.vala:113
 msgid "Create a .home folder next to every newly installed AppImage"
-msgstr ""
+msgstr "Створювати теку .home поруч із кожним нововстановленим AppImage"
 
 #: src/windows/preferences_window.vala:117
 msgid "Portable .config by default"
-msgstr ""
+msgstr "Автономна тека .config стандартно"
 
 #: src/windows/preferences_window.vala:118
 msgid "Create a .config folder next to every newly installed AppImage"
-msgstr ""
+msgstr "Створювати теку .config поруч із кожним нововстановленим AppImage"
 
 #: src/windows/preferences_window.vala:122
 msgid "Keep file extension name"
-msgstr ""
+msgstr "Зберігати розширення .AppImage"
 
 #: src/windows/preferences_window.vala:123
 msgid ""
 "Replace spaces with underscores in installed filenames and keep "
 "the .AppImage extension"
 msgstr ""
+"Замінювати пробіли на підкреслення для назв встановлених файлів програм і "
+"зберігати розширення .AppImage"
 
 #: src/windows/preferences_window.vala:135
 msgid "Automatic updates"
-msgstr "Автоматичні оновлення"
+msgstr "Оновлення"
 
 #: src/windows/preferences_window.vala:136
 msgid "Configure automatic update checking"
-msgstr "Налаштувати автоматичну перевірку оновлень"
+msgstr "Налаштування перевірки оновлень"
 
 #: src/windows/preferences_window.vala:142
 msgid "Open update log"
-msgstr "Відкрити журнал оновлень"
+msgstr "Журнал оновлень"
 
 #: src/windows/preferences_window.vala:156
 msgid "Background update check"
@@ -1389,15 +1396,15 @@ msgstr "Фонова перевірка оновлень"
 
 #: src/windows/preferences_window.vala:157
 msgid "Will notify when new app updates are available"
-msgstr "Сповіщатиме, коли будуть доступні нові оновлення програми"
+msgstr "Сповіщати про наявність нових оновлень"
 
 #: src/windows/preferences_window.vala:168
 msgid "Auto update apps"
-msgstr "Автоматичне оновлення програм"
+msgstr "Фонове встановлення"
 
 #: src/windows/preferences_window.vala:169
 msgid "Will update apps automatically in background"
-msgstr "Автоматично оновлюватиме програми у фоновому режимі"
+msgstr "Одразу застосовувати нові версії без додаткових запитів"
 
 #: src/windows/preferences_window.vala:175
 msgid "Check interval"
@@ -1421,20 +1428,19 @@ msgstr "Мініатюри"
 
 #: src/windows/preferences_window.vala:207
 msgid "AppImage Thumbnailer"
-msgstr "AppImage Thumbnailer"
+msgstr "Генератор мініатюр AppImage"
 
 #: src/windows/preferences_window.vala:208
 msgid "Install appimage-thumbnailer to generate thumbnails for AppImages"
-msgstr ""
-"Встановіть appimage-thumbnailer, щоб генерувати мініатюри для AppImages"
+msgstr "Встановити appimage-thumbnailer для генерації мініатюр AppImages"
 
 #: src/windows/preferences_window.vala:217
 msgid "Hide Nautilus thumbnail background"
-msgstr "Сховати фон мініатюри Nautilus"
+msgstr "Сховати тло мініатюри в Nautilus"
 
 #: src/windows/preferences_window.vala:218
 msgid "Remove the alpha checkerboard behind thumbnails and icons"
-msgstr "Видаліть альфа-шашку за ескізами та піктограмами"
+msgstr "Прибрати напівпрозору шахівницю за мініатюрами й піктограмами"
 
 #: src/windows/preferences_window.vala:229
 msgid "GitHub"
@@ -1445,8 +1451,8 @@ msgid ""
 "Authenticate with GitHub to raise the API rate limit from 60 to 5,000 "
 "requests per hour"
 msgstr ""
-"Пройдіть автентифікацію за допомогою GitHub, щоб збільшити ліміт швидкості "
-"API з 60 до 5000 запитів на годину"
+"Пройти автентифікацію GitHub для збільшення ліміту API з 60 до 5000 запитів "
+"на годину"
 
 #: src/windows/preferences_window.vala:233
 msgid "Personal access token"
@@ -1459,7 +1465,7 @@ msgstr "Застосувати токен"
 #: src/windows/preferences_window.vala:247
 #: src/windows/preferences_window.vala:266
 msgid "GitHub token saved"
-msgstr "GitHub токен збережено"
+msgstr "Токен GitHub збережено"
 
 #: src/windows/preferences_window.vala:253
 msgid "Clear token"
@@ -1467,15 +1473,16 @@ msgstr "Очистити токен"
 
 #: src/windows/preferences_window.vala:257
 msgid "GitHub token cleared"
-msgstr "GitHub токен очищено"
+msgstr "Токен GitHub очищено"
 
 #: src/windows/preferences_window.vala:273
 msgid "Test token"
-msgstr "Перевірити токен"
+msgstr "Перевірка токена"
 
 #: src/windows/preferences_window.vala:274
 msgid "Verify your token works and check rate limit status"
-msgstr "Перевірте працездатність токена та обмеження запитів"
+msgstr ""
+"Переконатися у працездатності токена й перевірити статус ліміту запитів"
 
 #: src/windows/preferences_window.vala:278
 msgid "Test"
@@ -1492,19 +1499,20 @@ msgstr "Створити токен на GitHub"
 #: src/windows/preferences_window.vala:303
 msgid "Fine-grained token with read-only public repo access is sufficient"
 msgstr ""
-"Досить детального токена з доступом до публічного репо лише для читання"
+"Достатньо токена Fine-grained із доступом до публічних репозиторіїв лише для "
+"читання"
 
 #: src/windows/preferences_window.vala:360
 msgid "Select Installation Directory"
-msgstr "Виберіть каталог встановлення"
+msgstr "Вибір теки встановлення"
 
 #: src/windows/preferences_window.vala:427
 msgid "Invalid Path"
-msgstr "Недійсний шлях"
+msgstr "Неправильний шлях"
 
 #: src/windows/preferences_window.vala:437
 msgid "Installation directory updated"
-msgstr "Оновлено каталог встановлення"
+msgstr "Теку встановлення оновлено"
 
 #: src/windows/preferences_window.vala:447
 msgid "Move Installed Apps?"
@@ -1516,12 +1524,12 @@ msgid ""
 "This will move %d installed app(s) to the new location. This may take a "
 "while depending on the size of your apps."
 msgstr ""
-"Це перемістить %d встановлені програми в нове розташування. Це може зайняти "
-"деякий час залежно від розміру ваших програм."
+"Встановлені програми (%d) буде переміщено в нове місце. Це може тривати "
+"певний час залежно від їхнього розміру."
 
 #: src/windows/preferences_window.vala:451
 msgid "Move Apps"
-msgstr "Перемістити додатки"
+msgstr "Перемістити програми"
 
 #: src/windows/preferences_window.vala:483
 msgid "Moving Apps…"
@@ -1529,15 +1537,15 @@ msgstr "Переміщення програм…"
 
 #: src/windows/preferences_window.vala:483
 msgid "Please wait while your apps are being moved."
-msgstr "Будь ласка, зачекайте, поки ваші програми переміщуються."
+msgstr "Дочекайтесь допереміщення."
 
 #: src/windows/preferences_window.vala:520
 msgid "Apps moved successfully"
-msgstr "Програми успішно переміщено"
+msgstr "Програми переміщено"
 
 #: src/windows/preferences_window.vala:522
 msgid "Migration Failed"
-msgstr "Помилка міграції"
+msgstr "Помилка перенесення"
 
 #: src/windows/preferences_window.vala:522
 msgid "Unknown error occurred"
@@ -1545,20 +1553,20 @@ msgstr "Сталася невідома помилка"
 
 #: src/windows/preferences_window.vala:540
 msgid "OK"
-msgstr "Ок"
+msgstr "Гаразд"
 
 #: src/windows/preferences_window.vala:580
 msgid "Authentication failed — token is invalid or expired"
-msgstr "Помилка автентифікації — токен недійсний або прострочений"
+msgstr "Помилка автентифікації — токен неправильний або прострочений"
 
 #: src/windows/preferences_window.vala:582
 msgid "Access forbidden — token lacks required permissions"
-msgstr "Доступ заборонено — токен не має необхідних дозволів"
+msgstr "Доступ заборонено — токен не має потрібних дозволів"
 
 #: src/windows/preferences_window.vala:588
 #, c-format
 msgid "Token is valid — %s / %s requests remaining"
-msgstr "Токен дійсний — залишилося %s / %s запитів"
+msgstr "Токен дійсний — залишилося %s з %s запитів"
 
 #: src/windows/preferences_window.vala:590
 msgid "Token is valid"
@@ -1572,12 +1580,12 @@ msgstr "Неочікувана відповідь (%u)"
 #: src/windows/preferences_window.vala:596
 #, c-format
 msgid "Connection error: %s"
-msgstr "Помилка підключення: %s"
+msgstr "Помилка з'єднання: %s"
 
 #. (itstool) path: component/id
 #: data/com.github.AppManager.metainfo.xml:3
 msgid "com.github.AppManager"
-msgstr ""
+msgstr "com.github.AppManager"
 
 #. (itstool) path: developer/name
 #. (itstool) path: component/developer_name
@@ -1589,67 +1597,67 @@ msgstr "Арніс Кемлерс"
 #. (itstool) path: component/summary
 #: data/com.github.AppManager.metainfo.xml:9
 msgid "Drag-and-drop AppImage installer and management application"
-msgstr "Встановлювач та менеджер для AppImage програм"
+msgstr "Інструмент для встановлення та керування AppImage"
 
 #. (itstool) path: component/metadata_license
 #: data/com.github.AppManager.metainfo.xml:10
 msgid "CC0-1.0"
-msgstr ""
+msgstr "CC0-1.0"
 
 #. (itstool) path: component/project_license
 #: data/com.github.AppManager.metainfo.xml:11
 msgid "GPL-3.0-or-later"
-msgstr ""
+msgstr "GPL-3.0-or-later"
 
 #. (itstool) path: custom/value
 #: data/com.github.AppManager.metainfo.xml:15
 msgid "© 2026 Arnis Kemlers"
-msgstr ""
+msgstr "© 2026 Арніс Кемлерз"
 
 #. (itstool) path: bundle/name
 #: data/com.github.AppManager.metainfo.xml:20
 msgid "squashfs-tools (unsquashfs)"
-msgstr ""
+msgstr "squashfs-tools (unsquashfs)"
 
 #. (itstool) path: bundle/copyright
 #: data/com.github.AppManager.metainfo.xml:21
 msgid "© Phillip Lougher"
-msgstr ""
+msgstr "© Філліп Логер"
 
 #. (itstool) path: bundle/license
 #: data/com.github.AppManager.metainfo.xml:22
 msgid "GPL-2.0-or-later"
-msgstr ""
+msgstr "GPL-2.0-or-later"
 
 #. (itstool) path: bundle/name
 #: data/com.github.AppManager.metainfo.xml:25
 msgid "DwarFS"
-msgstr ""
+msgstr "DwarFS"
 
 #. (itstool) path: bundle/copyright
 #: data/com.github.AppManager.metainfo.xml:26
 msgid "© Marcus Holland-Moritz"
-msgstr ""
+msgstr "© Маркус Голланд-Моріц"
 
 #. (itstool) path: bundle/license
 #: data/com.github.AppManager.metainfo.xml:27
 msgid "GPL-3.0"
-msgstr ""
+msgstr "GPL-3.0"
 
 #. (itstool) path: bundle/name
 #: data/com.github.AppManager.metainfo.xml:30
 msgid "zsync2"
-msgstr ""
+msgstr "zsync2"
 
 #. (itstool) path: bundle/copyright
 #: data/com.github.AppManager.metainfo.xml:31
 msgid "© AppImageCommunity, © Colin Phipps"
-msgstr ""
+msgstr "© AppImageCommunity, © Колін Фіппс"
 
 #. (itstool) path: bundle/license
 #: data/com.github.AppManager.metainfo.xml:32
 msgid "Artistic-2.0"
-msgstr ""
+msgstr "Artistic-2.0"
 
 #. (itstool) path: description/p
 #: data/com.github.AppManager.metainfo.xml:35
@@ -1658,58 +1666,31 @@ msgid ""
 "drop workflow inspired by macOS. It handles desktop integration, icon "
 "extraction, executable bits, and app updates."
 msgstr ""
-"AppManager дозволяє встановлювати або видаляти AppImage програми за "
-"допомогою знайомого процесу перетягування, натхненного macOS. Він керує "
-"інтеграцією робочого столу, додаванням піктограм, виконуваними бітами та "
-"інтеграцією в контекстне меню Nautilus."
+"Упорядник AppImage дозволяє встановлювати або видаляти AppImages "
+"перетягуванням, натхненним macOS. Він керує інтеграцією зі стільницею, "
+"витягуванням піктограм, правами на виконання й оновленнями програм."
 
 #. (itstool) path: component/launchable
 #: data/com.github.AppManager.metainfo.xml:37
 msgid "com.github.AppManager.desktop"
-msgstr ""
+msgstr "com.github.AppManager.desktop"
 
 #. (itstool) path: component/url
 #: data/com.github.AppManager.metainfo.xml:38
 msgid "https://github.com/kem-a/AppManager"
-msgstr ""
+msgstr "https://github.com/kem-a/AppManager"
 
 #. (itstool) path: component/url
 #: data/com.github.AppManager.metainfo.xml:39
 msgid "https://github.com/kem-a/AppManager/issues"
-msgstr ""
+msgstr "https://github.com/kem-a/AppManager/issues"
 
 #. (itstool) path: component/url
 #: data/com.github.AppManager.metainfo.xml:40
 msgid "https://github.com/kem-a/AppManager/graphs/contributors"
-msgstr ""
+msgstr "https://github.com/kem-a/AppManager/graphs/contributors"
 
 #. (itstool) path: provides/binary
 #: data/com.github.AppManager.metainfo.xml:42
 msgid "app-manager"
-msgstr ""
-
-#, c-format
-#~ msgid "Update %s?"
-#~ msgstr "Оновити %s?"
-
-#~ msgid "Version unknown"
-#~ msgstr "Версія невідома"
-
-#, c-format
-#~ msgid "Will update to version %s"
-#~ msgstr "Буде оновлено до версії %s"
-
-#~ msgid "Update info"
-#~ msgstr "Інформація для оновлення"
-
-#~ msgid "How update links work"
-#~ msgstr "Як працюють посилання на оновлення"
-
-#~ msgid "Advanced"
-#~ msgstr "Просунуті"
-
-#~ msgid "Got it"
-#~ msgstr "Зрозуміло"
-
-#~ msgid "Launch Application"
-#~ msgstr "Запустити програму"
+msgstr "app-manager"
