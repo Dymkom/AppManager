@@ -31,7 +31,8 @@
 stdenv.mkDerivation(finalAttrs: {
   pname = "app-manager";
   version = let
-  	match = builtins.match ".*version: '([0-9.]+)'.*" (builtins.readFile ./meson.build);
+    # Match only the project version, including prerelease suffixes.
+    match = builtins.match ".*project\\([^)]*[[:space:]]version: '([^']+)'.*" (builtins.readFile ./meson.build);
   in lib.head match;
 
   src = ./.;
