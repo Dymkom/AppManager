@@ -8,6 +8,7 @@ namespace AppManager.Core {
      *
      * Entries are keyed by lowercase app name. When an app is uninstalled, its custom
      * values remain in custom.json for automatic restoration on reinstall.
+     * Sandbox history contains only Special permissions folders.
      */
     public class CustomValuesStore : Object {
         private HashTable<string, Json.Object> entries;
@@ -120,7 +121,9 @@ namespace AppManager.Core {
             bool changed = false;
             foreach (var key in history.get_keys()) {
                 if (!entries.contains(key)) {
-                    entries.insert(key, history.get(key));
+                    var obj = history.get(key);
+                    strip_sandbox_history(obj);
+                    entries.insert(key, obj);
                     changed = true;
                     debug("Migrated history custom values for %s to custom.json", key);
                 }
@@ -167,6 +170,7 @@ namespace AppManager.Core {
                 var parser = new Json.Parser();
                 parser.load_from_data(contents, contents.length);
                 var root = parser.get_root();
+                bool migrated = false;
                 if (root != null && root.get_node_type() == Json.NodeType.OBJECT) {
                     var root_obj = root.get_object();
                     if (root_obj.has_member("entries")) {
@@ -175,6 +179,7 @@ namespace AppManager.Core {
                             if (node.get_node_type() == Json.NodeType.OBJECT) {
                                 var obj = node.get_object();
                                 if (obj.has_member("name")) {
+                                    migrated = strip_sandbox_history(obj) || migrated;
                                     var name = obj.get_string_member("name");
                                     entries.insert(name.down(), obj);
                                 }
@@ -182,9 +187,22 @@ namespace AppManager.Core {
                         }
                     }
                 }
+                if (migrated) save_unlocked();
             } catch (Error e) {
                 warning("Failed to load custom values: %s", e.message);
             }
+        }
+
+        private static bool strip_sandbox_history(Json.Object obj) {
+            var obsolete = new Gee.ArrayList<string>();
+            foreach (var key in obj.get_members()) {
+                if ((key.has_prefix("sandbox_") && key != "sandbox_extra_dirs")
+                    || key == "apphub_policy_customized" || key == "apphub_id" || key == "apphub_policy") {
+                    obsolete.add(key);
+                }
+            }
+            foreach (var key in obsolete) obj.remove_member(key);
+            return obsolete.size > 0;
         }
 
         private void save_unlocked() {

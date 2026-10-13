@@ -92,19 +92,14 @@ namespace AppManager {
             var props_group = build_properties_group();
             // update_group will be handled inside build_app_updates_page()
             var advanced_row = build_advanced_action_row();
-            // Portable .home/.config toggles only apply to portable (non-extracted) AppImages.
-            // They are never offered for AppManager itself: the AppImage runtime would
-            // redirect $HOME and AppManager would lose its own registry and settings
-            // (self-install loop, issue #140).
-            var is_self = record.original_startup_wm_class == Core.APPLICATION_ID;
-            if (record.mode == InstallMode.PORTABLE && !is_self) {
-                props_group.add(build_portable_home_row());
-                props_group.add(build_portable_config_row());
-            }
             props_group.add(advanced_row);
             
             detail_page.add(props_group);
-            
+
+            var security_group = new Adw.PreferencesGroup();
+            security_group.add(build_security_action_row());
+            detail_page.add(security_group);
+
             var update_group_replacement = new Adw.PreferencesGroup();
             update_group_replacement.add(build_update_info_action_row());
             detail_page.add(update_group_replacement);
@@ -337,6 +332,7 @@ namespace AppManager {
             var exec_row = new Adw.EntryRow();
             exec_row.title = _("Command line arguments");
             exec_row.text = current_args;
+            exec_row.add_prefix(new Gtk.Image.from_icon_name("utilities-terminal-symbolic"));
             
             var restore_exec_button = create_restore_button(record.custom_commandline_args != null);
             restore_exec_button.clicked.connect(() => {
@@ -375,7 +371,8 @@ namespace AppManager {
             var row = new Adw.ActionRow();
             row.title = _("App Updates");
             row.subtitle = _("Edit app update details");
-            
+            row.add_prefix(new Gtk.Image.from_icon_name("software-update-available-symbolic"));
+
             var status_label = new Gtk.Label(record.updates_enabled ? _("On") : _("Off"));
             status_label.add_css_class("dim-label");
             row.add_suffix(status_label);
@@ -406,6 +403,7 @@ namespace AppManager {
             var toggle_group = new Adw.PreferencesGroup();
             var enable_updates_row = new Adw.SwitchRow();
             enable_updates_row.title = _("Enable app updates");
+            enable_updates_row.add_prefix(new Gtk.Image.from_icon_name("software-update-available-symbolic"));
             enable_updates_row.active = record.updates_enabled;
             toggle_group.add(enable_updates_row);
             prefs_page.add(toggle_group);
@@ -443,6 +441,7 @@ namespace AppManager {
             var prerelease_row = new Adw.SwitchRow();
             prerelease_row.title = _("Pre-release Updates");
             prerelease_row.subtitle = _("Include pre-release versions when checking for updates");
+            prerelease_row.add_prefix(new Gtk.Image.from_icon_name("starred-symbolic"));
             prerelease_row.active = record.prerelease_enabled;
             prerelease_row.notify["active"].connect(() => {
                 record.prerelease_enabled = prerelease_row.active;
@@ -497,6 +496,7 @@ namespace AppManager {
         private Adw.EntryRow build_update_link_row(Adw.SwitchRow? prerelease_row) {
             var update_row = new Adw.EntryRow();
             update_row.title = _("Update Link");
+            update_row.add_prefix(new Gtk.Image.from_icon_name("insert-link-symbolic"));
             update_row.text = record.get_effective_update_link() ?? "";
             
             var restore_update_button = create_restore_button(record.custom_update_link != null);
@@ -553,6 +553,7 @@ namespace AppManager {
         private Adw.EntryRow build_webpage_row() {
             var webpage_row = new Adw.EntryRow();
             webpage_row.title = _("Web Page");
+            webpage_row.add_prefix(new Gtk.Image.from_icon_name("web-browser-symbolic"));
             webpage_row.text = record.get_effective_web_page() ?? "";
             
             var restore_webpage_button = create_restore_button(record.custom_web_page != null);
@@ -600,10 +601,699 @@ namespace AppManager {
             webpage_row.add_suffix(open_web_button);
             
             return webpage_row;
-        }        private Adw.ActionRow build_advanced_action_row() {
+        }
+
+        // Order of the Profile combo, and the mapping to stored profile names.
+        private const string[] SANDBOX_PROFILE_ORDER = {
+            Core.SANDBOX_PROFILE_OFF,
+            Core.SANDBOX_PROFILE_STANDARD,
+            Core.SANDBOX_PROFILE_STRICT,
+            Core.SANDBOX_PROFILE_CUSTOM
+        };
+
+        private string sandbox_status_label() {
+            if (!record.sandbox_enabled()) {
+                // The two are alternatives, so with the sandbox off a portable folder is
+                // what decides where this app keeps its data, and saying "Off" would
+                // describe the page as empty when it is not.
+                return Installer.has_portable_folders(record) ? _("Portable") : _("Off");
+            }
+            switch (record.sandbox_profile) {
+                case Core.SANDBOX_PROFILE_STANDARD: return _("Standard");
+                case Core.SANDBOX_PROFILE_STRICT:   return _("Strict");
+                case Core.SANDBOX_PROFILE_APPHUB:   return _("AppHub");
+                default:                            return _("Custom");
+            }
+        }
+
+        private Adw.ActionRow build_security_action_row() {
+            var row = new Adw.ActionRow();
+            // ActionRow titles are Pango markup, so a bare "&" is invalid and the
+            // title silently fails to render. Keep the string clean for translators.
+            row.title = Markup.escape_text(_("Privacy & Security"));
+            row.subtitle = _("Run this app isolated from the rest of your files");
+            row.add_prefix(new Gtk.Image.from_icon_name("security-high-symbolic"));
+
+            var status_label = new Gtk.Label(sandbox_status_label());
+            status_label.add_css_class("dim-label");
+            row.add_suffix(status_label);
+
+            var icon = new Gtk.Image.from_icon_name("go-next-symbolic");
+            row.add_suffix(icon);
+            row.activatable = true;
+            row.activated.connect(() => {
+                var page = build_security_page(status_label);
+                var main_win = (MainWindow) this.get_root();
+                main_win.push_page(page);
+            });
+            return row;
+        }
+
+        private const string[] SANDBOX_DISPLAY_ORDER = { "legacy", "wayland-or-x11", "wayland", "x11", "none" };
+
+        private int sandbox_display_index() {
+            var display = record.sandbox_display ?? (record.sandbox_allow_x11 ? "legacy" : "wayland");
+            for (int i = 0; i < SANDBOX_DISPLAY_ORDER.length; i++) {
+                if (SANDBOX_DISPLAY_ORDER[i] == display) return i;
+            }
+            return 0;
+        }
+
+        private Adw.ComboRow build_folder_permission_row(string title, string icon_name, string location) {
+            var row = new Adw.ComboRow();
+            row.title = title;
+            row.add_prefix(new Gtk.Image.from_icon_name(icon_name));
+            row.model = new Gtk.StringList({ _("Off"), _("Read-only"), _("Read and write") });
+            row.selected = Core.SandboxConfig.folder_access(record, location);
+            return row;
+        }
+
+        private Adw.SwitchRow build_permission_row(string title, string? subtitle, string icon_name, bool active) {
+            var row = new Adw.SwitchRow();
+            row.title = title;
+            if (subtitle != null) {
+                row.subtitle = subtitle;
+            }
+            row.add_prefix(new Gtk.Image.from_icon_name(icon_name));
+            row.active = active;
+            return row;
+        }
+
+        private Adw.NavigationPage build_security_page(Gtk.Label status_label) {
+            var prefs_page = new Adw.PreferencesPage();
+
+            bool supported = Core.SandboxConfig.supports_record(record);
+            bool available = AppPaths.sandbox_available;
+
+            // Say plainly why the controls are dead rather than just greying them out.
+            if (!supported || !available) {
+                var notice_group = new Adw.PreferencesGroup();
+                var notice_row = new Adw.ActionRow();
+                if (!supported) {
+                    notice_row.title = _("Sandboxing is not available for this app");
+                    notice_row.subtitle = record.mode == InstallMode.EXTRACTED
+                        ? _("Only apps installed in portable mode can be sandboxed.")
+                        : _("AppManager cannot sandbox itself.");
+                } else {
+                    notice_row.title = _("Sandboxing requires bubblewrap");
+                    notice_row.subtitle = _("Install the bubblewrap and xdg-dbus-proxy packages to use this.");
+                }
+                notice_row.add_prefix(new Gtk.Image.from_icon_name("dialog-warning-symbolic"));
+                notice_group.add(notice_row);
+                prefs_page.add(notice_group);
+            }
+
+            // A separate mechanism from the sandbox, and listed first for that reason.
+            // It is an alternative rather than an addition: only the AppImage runtime
+            // reads these folders, and a sandboxed launch never runs it.
+            var portable_group = new Adw.PreferencesGroup();
+            portable_group.title = _("Portable folders");
+            portable_group.visible = supported;
+
+            var portable_home_row = new Adw.SwitchRow();
+            portable_home_row.title = _("Portable .home folder");
+            portable_home_row.subtitle = _("Store the app's home directory in a .home folder next to the AppImage");
+            portable_home_row.add_prefix(new Gtk.Image.from_icon_name("user-home-symbolic"));
+            portable_group.add(portable_home_row);
+
+            var portable_config_row = new Adw.SwitchRow();
+            portable_config_row.title = _("Portable .config folder");
+            portable_config_row.subtitle = _("Store the app's config in a .config folder next to the AppImage");
+            portable_config_row.add_prefix(new Gtk.Image.from_icon_name("emblem-system-symbolic"));
+            portable_group.add(portable_config_row);
+            prefs_page.add(portable_group);
+
+            var profile_group = new Adw.PreferencesGroup();
+            profile_group.title = _("Sandbox");
+            profile_group.description = _("A sandboxed app gets its own home folder and cannot read the rest of yours. Standard keeps the network and sound working; Strict takes both away. Apps that need something you have not granted may fail to start or silently misbehave.");
+
+            var profile_order = new Gee.ArrayList<string>();
+            foreach (var profile in SANDBOX_PROFILE_ORDER) profile_order.add(profile);
+            bool has_apphub = Core.SandboxConfig.has_apphub_profile(record);
+            if (has_apphub) profile_order.add(Core.SANDBOX_PROFILE_APPHUB);
+            var profile_row = new Adw.ComboRow();
+            profile_row.title = _("Profile");
+            profile_row.add_prefix(new Gtk.Image.from_icon_name("security-high-symbolic"));
+            profile_row.model = new Gtk.StringList({
+                _("Off"), _("Standard"), _("Strict"), _("Custom")
+            });
+            if (has_apphub) ((Gtk.StringList) profile_row.model).append(_("AppHub"));
+            profile_group.add(profile_row);
+            if (record.apphub_id != null) {
+                var source_row = new Adw.ActionRow();
+                source_row.title = _("AppHub sandbox template");
+                source_row.subtitle = record.apphub_id;
+                source_row.add_prefix(new Gtk.Image.from_icon_name("folder-download-symbolic"));
+                profile_group.add(source_row);
+            }
+            prefs_page.add(profile_group);
+
+            var access_group = new Adw.PreferencesGroup();
+            access_group.title = _("Access");
+            var service_rows = new Gee.HashMap<string, Adw.SwitchRow>();
+
+            var network_row = build_permission_row(
+                _("Network"), null, "network-wireless-symbolic", record.sandbox_allow_network);
+            access_group.add(network_row);
+
+            var audio_row = build_permission_row(
+                _("Sound"),
+                _("Includes microphone: playback and recording share one connection."),
+                "audio-speakers-symbolic",
+                record.sandbox_allow_audio);
+            access_group.add(audio_row);
+
+            var display_row = new Adw.ComboRow();
+            display_row.title = _("Display");
+            display_row.use_subtitle = true;
+            display_row.subtitle_lines = 0;
+            display_row.tooltip_text = _("Prefer Wayland when available; otherwise use X11.");
+            display_row.model = new Gtk.StringList({ _("Wayland and X11"), _("Prefer Wayland, otherwise X11"), _("Wayland only"), _("X11 only"), _("None") });
+            display_row.selected = sandbox_display_index();
+            display_row.add_prefix(new Gtk.Image.from_icon_name("video-display-symbolic"));
+            access_group.add(display_row);
+
+            var dbus_row = build_permission_row(
+                _("Full session bus"),
+                _("Unfiltered access to desktop services. Weakens the sandbox, so grant it only to apps you trust."),
+                "dialog-warning-symbolic",
+                record.sandbox_allow_dbus);
+            access_group.add(dbus_row);
+
+            prefs_page.add(access_group);
+
+            var devices_group = new Adw.PreferencesGroup();
+            devices_group.title = _("Devices");
+
+            var gpu_row = build_permission_row(
+                _("Hardware acceleration"),
+                _("Access to the graphics card. Without it most apps fall back to software rendering."),
+                "chip-symbolic",
+                record.sandbox_allow_gpu);
+            devices_group.add(gpu_row);
+
+            var camera_row = build_permission_row(
+                _("Camera"),
+                _("Direct device access."),
+                "camera-photo-symbolic",
+                record.sandbox_allow_camera);
+            devices_group.add(camera_row);
+
+            var input_row = build_permission_row(
+                _("Game controllers"),
+                _("Also exposes keyboards and mice, so grant it only to apps that need a gamepad."),
+                "input-gaming-symbolic",
+                record.sandbox_allow_input);
+            devices_group.add(input_row);
+
+            var bluetooth_row = build_permission_row(
+                _("Bluetooth"), null, "bluetooth-active-symbolic", Core.SandboxConfig.service_enabled(record, "bluetooth"));
+            service_rows.set("bluetooth", bluetooth_row);
+            devices_group.add(bluetooth_row);
+
+            prefs_page.add(devices_group);
+
+            var services_group = new Adw.PreferencesGroup();
+            services_group.title = _("Services");
+
+            var notifications_row = build_permission_row(
+                _("Notifications"), null, "preferences-system-notifications-symbolic",
+                Core.SandboxConfig.service_enabled(record, "notifications"));
+            service_rows.set("notifications", notifications_row);
+            services_group.add(notifications_row);
+
+            var accessibility_row = build_permission_row(
+                _("Accessibility"), _("Connect to the desktop accessibility service through a filtered bus."),
+                "preferences-desktop-accessibility-symbolic", Core.SandboxConfig.service_enabled(record, "accessibility"));
+            service_rows.set("accessibility", accessibility_row);
+            services_group.add(accessibility_row);
+
+            var location_row = build_permission_row(
+                _("Location"), _("Reaches the system location service. AppManager alone enforces this - it does not appear in your desktop's location settings."), "find-location-symbolic",
+                Core.SandboxConfig.service_enabled(record, "location"));
+            service_rows.set("location", location_row);
+            services_group.add(location_row);
+
+            var network_info_row = build_permission_row(
+                _("Network information"), _("Read network status and interface information from NetworkManager."),
+                "network-workgroup-symbolic", Core.SandboxConfig.service_enabled(record, "network-information"));
+            service_rows.set("network-information", network_info_row);
+            services_group.add(network_info_row);
+
+            prefs_page.add(services_group);
+
+            var folders_group = new Adw.PreferencesGroup();
+            folders_group.title = _("Folders");
+            folders_group.description = _("Folders shared with the app. Choose read-only or read and write access. Other folders stay hidden, including anything you pick in a file dialog inside the app.");
+
+            var downloads_row = build_folder_permission_row(
+                _("Downloads"), "folder-download-symbolic", "downloads");
+            folders_group.add(downloads_row);
+            var documents_row = build_folder_permission_row(
+                _("Documents"), "folder-documents-symbolic", "documents");
+            folders_group.add(documents_row);
+            var desktop_row = build_folder_permission_row(
+                _("Desktop"), "user-desktop-symbolic", "desktop");
+            folders_group.add(desktop_row);
+            var pictures_row = build_folder_permission_row(
+                _("Pictures"), "folder-pictures-symbolic", "pictures");
+            folders_group.add(pictures_row);
+            var videos_row = build_folder_permission_row(
+                _("Videos"), "folder-videos-symbolic", "videos");
+            folders_group.add(videos_row);
+            var music_row = build_folder_permission_row(
+                _("Music"), "folder-music-symbolic", "music");
+            folders_group.add(music_row);
+
+            prefs_page.add(folders_group);
+
+            var imported_group = new Adw.PreferencesGroup();
+            imported_group.title = _("Additional imported permissions");
+            imported_group.description = _("Access defined by the AppHub template. Choosing Standard or Strict replaces these permissions.");
+            var imported_rows = new Gee.ArrayList<Adw.ActionRow>();
+            UpdateFunc sync_imported_permissions = () => {
+                foreach (var row in imported_rows) imported_group.remove(row);
+                imported_rows.clear();
+                foreach (var rule in record.sandbox_session_rules ?? new string[0]) {
+                    var row = new Adw.ActionRow();
+                    row.title = rule;
+                    row.subtitle = _("Session bus");
+                    imported_group.add(row);
+                    imported_rows.add(row);
+                }
+                foreach (var rule in record.sandbox_system_rules ?? new string[0]) {
+                    var row = new Adw.ActionRow();
+                    row.title = rule;
+                    row.subtitle = _("System bus");
+                    imported_group.add(row);
+                    imported_rows.add(row);
+                }
+                if (record.sandbox_system_bus == "full") {
+                    var row = new Adw.ActionRow();
+                    row.title = _("Full system bus");
+                    imported_group.add(row);
+                    imported_rows.add(row);
+                }
+                foreach (var permission in record.sandbox_other_dirs ?? new string[0]) {
+                    var row = new Adw.ActionRow();
+                    row.title = permission;
+                    row.subtitle = _("Folders");
+                    imported_group.add(row);
+                    imported_rows.add(row);
+                }
+                foreach (var device in record.sandbox_extra_devices ?? new string[0]) {
+                    var row = new Adw.ActionRow();
+                    row.title = device;
+                    row.subtitle = _("Devices");
+                    imported_group.add(row);
+                    imported_rows.add(row);
+                }
+                if (record.sandbox_share_processes || record.sandbox_share_ipc) {
+                    var row = new Adw.ActionRow();
+                    row.title = record.sandbox_share_processes ? _("Host process access") : _("Host IPC access");
+                    if (record.sandbox_share_processes && record.sandbox_share_ipc) row.subtitle = _("Host IPC access");
+                    imported_group.add(row);
+                    imported_rows.add(row);
+                }
+                if (record.sandbox_allow_media_controls) {
+                    foreach (var name in record.sandbox_media_names ?? new string[0]) {
+                        var row = new Adw.ActionRow();
+                        row.title = name;
+                        row.subtitle = _("Media controls");
+                        imported_group.add(row);
+                        imported_rows.add(row);
+                    }
+                }
+            };
+            sync_imported_permissions();
+            prefs_page.add(imported_group);
+
+            // The "manual override" of issue #37, as a list rather than a single slot:
+            // anything outside the XDG set the app still needs - including the real target
+            // of a symlink, which a bind of the link alone leaves dangling.
+            var extra_group = new Adw.PreferencesGroup();
+            extra_group.title = _("Special permissions");
+            extra_group.description = _("Additional folders this app may read and write. A symlink only works if you also add the folder it points at.");
+
+            var add_folder_button = new Gtk.Button.from_icon_name("list-add-symbolic");
+            add_folder_button.valign = Gtk.Align.CENTER;
+            add_folder_button.tooltip_text = _("Add folder");
+            add_folder_button.add_css_class("flat");
+            extra_group.header_suffix = add_folder_button;
+
+            var extra_rows = new Gee.ArrayList<Adw.ActionRow>();
+            prefs_page.add(extra_group);
+
+            // Folders Preferences grants to every sandboxed app. Listed here so this
+            // page shows everything the app can reach, but only editable there.
+            var global_dirs = Core.SandboxConfig.global_extra_dirs();
+            var global_group = new Adw.PreferencesGroup();
+            global_group.title = _("Global sandbox");
+            global_group.description = _("Folders granted to every sandboxed app. Change them in AppManager preferences.");
+            foreach (var entry in global_dirs) {
+                var global_path = Core.SandboxConfig.strip_access_suffix(entry);
+                var global_row = new Adw.ActionRow();
+                global_row.title = Path.get_basename(global_path);
+                global_row.subtitle = global_path;
+                global_row.add_prefix(new Gtk.Image.from_icon_name("folder-symbolic"));
+                global_group.add(global_row);
+            }
+            prefs_page.add(global_group);
+
+            // --- wiring -------------------------------------------------------------
+
+            bool suppress = false;
+
+            UpdateFunc sync_profile_row = () => {
+                suppress = true;
+                var current = record.sandbox_enabled()
+                    ? (record.sandbox_profile ?? Core.SANDBOX_PROFILE_CUSTOM)
+                    : Core.SANDBOX_PROFILE_OFF;
+                for (int i = 0; i < profile_order.size; i++) {
+                    if (profile_order[i] == current) {
+                        profile_row.selected = i;
+                        break;
+                    }
+                }
+                suppress = false;
+            };
+
+            UpdateFunc sync_permission_rows = () => {
+                suppress = true;
+                network_row.active       = record.sandbox_allow_network;
+                audio_row.active         = record.sandbox_allow_audio;
+                display_row.selected     = sandbox_display_index();
+                dbus_row.active          = record.sandbox_allow_dbus;
+                gpu_row.active           = record.sandbox_allow_gpu;
+                camera_row.active        = record.sandbox_allow_camera;
+                input_row.active         = record.sandbox_allow_input;
+                foreach (var service in service_rows.keys) {
+                    service_rows.get(service).active = Core.SandboxConfig.service_enabled(record, service);
+                }
+                downloads_row.selected   = Core.SandboxConfig.folder_access(record, "downloads");
+                documents_row.selected   = Core.SandboxConfig.folder_access(record, "documents");
+                desktop_row.selected     = Core.SandboxConfig.folder_access(record, "desktop");
+                pictures_row.selected    = Core.SandboxConfig.folder_access(record, "pictures");
+                videos_row.selected      = Core.SandboxConfig.folder_access(record, "videos");
+                music_row.selected       = Core.SandboxConfig.folder_access(record, "music");
+                sync_imported_permissions();
+                suppress = false;
+            };
+
+            UpdateFunc sync_portable_rows = () => {
+                suppress = true;
+                portable_home_row.active = Installer.has_portable_home(record);
+                portable_config_row.active = Installer.has_portable_config(record);
+                suppress = false;
+            };
+
+            UpdateFunc update_sensitivity = () => {
+                bool usable = supported && available;
+                profile_row.sensitive = usable;
+                // With the sandbox off there is nothing to configure, so the permission
+                // groups are hidden rather than shown greyed out.
+                bool show_permissions = usable && record.sandbox_enabled();
+                access_group.visible = show_permissions;
+                devices_group.visible = show_permissions;
+                services_group.visible = show_permissions;
+                foreach (var service in service_rows.keys) {
+                    service_rows.get(service).sensitive = !Core.SandboxConfig.service_has_full_bus(record, service);
+                }
+                folders_group.visible = show_permissions;
+                imported_group.visible = show_permissions && (
+                    record.sandbox_share_processes || record.sandbox_share_ipc || record.sandbox_system_bus == "full"
+                    || (record.sandbox_allow_media_controls && record.sandbox_media_names != null && record.sandbox_media_names.length > 0)
+                    || (record.sandbox_other_dirs != null && record.sandbox_other_dirs.length > 0)
+                    || (record.sandbox_session_rules != null && record.sandbox_session_rules.length > 0)
+                    || (record.sandbox_system_rules != null && record.sandbox_system_rules.length > 0)
+                    || (record.sandbox_extra_devices != null && record.sandbox_extra_devices.length > 0));
+                extra_group.visible = show_permissions;
+                global_group.visible = show_permissions && global_dirs.length > 0;
+
+                // Greyed rather than hidden while sandboxed, so the description can say
+                // where the data went.
+                bool sandboxed = record.sandbox_enabled();
+                portable_group.sensitive = !sandboxed;
+                portable_group.description = sandboxed
+                    ? _("Off while this app is sandboxed. The sandbox gives it a home folder of its own, and anything these folders held has been moved into that.")
+                    : _("The AppImage runtime redirects the app's home and config into folders next to the AppImage, so its data travels with the file. A sandboxed app never runs that runtime, so this and the sandbox are alternatives.");
+            };
+
+            CommitFunc commit = (permission_edit) => {
+                if (permission_edit) record.apphub_policy_customized = record.sandbox_profile != Core.SANDBOX_PROFILE_APPHUB;
+                persist_record_and_refresh_desktop();
+                status_label.set_label(sandbox_status_label());
+            };
+
+            // Re-label the profile so the combo reflects what the permissions now say.
+            // Never applied with the sandbox off: detect_profile has no "off" answer and
+            // would switch the sandbox on behind the user's back.
+            UpdateFunc relabel_profile = () => {
+                if (record.sandbox_enabled()) {
+                    record.sandbox_profile = Core.SandboxConfig.detect_profile(record);
+                }
+            };
+
+            // Extra-folder rows are added and removed one at a time rather than rebuilt
+            // wholesale: a rebuild would have to be callable from the row handlers it
+            // creates, introducing a cycle between the callbacks.
+            StringUpdateFunc add_extra_row = (path) => {
+                var row = new Adw.ActionRow();
+                row.title = Path.get_basename(path);
+                row.subtitle = path;
+                row.add_prefix(new Gtk.Image.from_icon_name("folder-symbolic"));
+
+                var remove_button = new Gtk.Button.from_icon_name("user-trash-symbolic");
+                remove_button.valign = Gtk.Align.CENTER;
+                remove_button.tooltip_text = _("Remove folder");
+                remove_button.add_css_class("flat");
+                remove_button.clicked.connect(() => {
+                    var kept = new Gee.ArrayList<string>();
+                    foreach (var entry in record.sandbox_extra_dirs ?? new string[0]) {
+                        if (Core.SandboxConfig.strip_access_suffix(entry) != path) {
+                            kept.add(entry);
+                        }
+                    }
+                    record.sandbox_extra_dirs = kept.size > 0 ? kept.to_array() : null;
+
+                    extra_group.remove(row);
+                    extra_rows.remove(row);
+                    relabel_profile();
+                    sync_profile_row();
+                    commit(false);
+                });
+                row.add_suffix(remove_button);
+
+                extra_group.add(row);
+                extra_rows.add(row);
+            };
+
+            StringUpdateFunc add_extra_dir = (path) => {
+                var dirs = new Gee.ArrayList<string>();
+                foreach (var entry in record.sandbox_extra_dirs ?? new string[0]) {
+                    // Adding the same folder twice would just repeat the bind.
+                    if (Core.SandboxConfig.strip_access_suffix(entry) == path) {
+                        return;
+                    }
+                    dirs.add(entry);
+                }
+                dirs.add("%s:rw".printf(path));
+                record.sandbox_extra_dirs = dirs.to_array();
+                add_extra_row(path);
+                relabel_profile();
+                sync_profile_row();
+                commit(false);
+            };
+
+            UpdateFunc on_permission_toggled = () => {
+                if (suppress) {
+                    return;
+                }
+                var previous_services = new Gee.HashMap<string, bool>();
+                foreach (var service in service_rows.keys) previous_services.set(service, Core.SandboxConfig.service_enabled(record, service));
+                record.sandbox_allow_network       = network_row.active;
+                record.sandbox_allow_audio         = audio_row.active;
+                if ((int) display_row.selected != sandbox_display_index()) {
+                    var display = SANDBOX_DISPLAY_ORDER[display_row.selected];
+                    record.sandbox_display = display == "legacy" ? null : display;
+                    record.sandbox_allow_x11 = display == "legacy" || display == "wayland-or-x11" || display == "x11";
+                }
+                if (record.sandbox_session_bus != null && record.sandbox_allow_dbus != dbus_row.active) {
+                    record.sandbox_session_bus = dbus_row.active ? "full" : "filtered";
+                }
+                record.sandbox_allow_dbus          = dbus_row.active;
+                record.sandbox_allow_gpu           = gpu_row.active;
+                record.sandbox_allow_camera        = camera_row.active;
+                record.sandbox_allow_input         = input_row.active;
+                foreach (var service in service_rows.keys) {
+                    var active = service_rows.get(service).active;
+                    if (active != previous_services.get(service)) Core.SandboxConfig.set_service_access(record, service, active);
+                }
+                Core.SandboxConfig.set_folder_access(record, "downloads", (int) downloads_row.selected);
+                Core.SandboxConfig.set_folder_access(record, "documents", (int) documents_row.selected);
+                Core.SandboxConfig.set_folder_access(record, "desktop", (int) desktop_row.selected);
+                Core.SandboxConfig.set_folder_access(record, "pictures", (int) pictures_row.selected);
+                Core.SandboxConfig.set_folder_access(record, "videos", (int) videos_row.selected);
+                Core.SandboxConfig.set_folder_access(record, "music", (int) music_row.selected);
+                relabel_profile();
+                sync_profile_row();
+                sync_permission_rows();
+                update_sensitivity();
+                commit(true);
+            };
+
+            sync_profile_row();
+            sync_portable_rows();
+            foreach (var entry in record.sandbox_extra_dirs ?? new string[0]) {
+                add_extra_row(Core.SandboxConfig.strip_access_suffix(entry));
+            }
+            update_sensitivity();
+
+            StringUpdateFunc apply_profile = (picked) => {
+                if (picked == Core.SANDBOX_PROFILE_APPHUB) {
+                    try {
+                        Core.SandboxConfig.restore_apphub_profile(record);
+                    } catch (Error e) {
+                        var error_dialog = new Adw.AlertDialog(_("Unable to restore the AppHub profile"), e.message);
+                        error_dialog.add_response("ok", _("OK"));
+                        error_dialog.present(this);
+                        sync_profile_row();
+                        return;
+                    }
+                    sync_permission_rows();
+                } else if (picked == Core.SANDBOX_PROFILE_CUSTOM) {
+                    // Custom is a label, not a preset - keep the permissions as they are.
+                    record.sandbox_profile = Core.SANDBOX_PROFILE_CUSTOM;
+                } else {
+                    Core.SandboxConfig.apply_preset(record, picked);
+                    sync_permission_rows();
+                }
+                sync_portable_rows();
+                update_sensitivity();
+                commit(picked != Core.SANDBOX_PROFILE_APPHUB);
+            };
+
+            profile_row.notify["selected"].connect(() => {
+                if (suppress) {
+                    return;
+                }
+                var index = profile_row.selected;
+                if (index >= profile_order.size) {
+                    return;
+                }
+                var picked = profile_order[(int) index];
+
+                // Switching the sandbox on takes the app's portable data with it, since
+                // nothing would read it where it is. Only a sandboxed home that already
+                // holds data raises a question worth asking.
+                if (picked != Core.SANDBOX_PROFILE_OFF
+                    && !record.sandbox_enabled()
+                    && Installer.has_portable_folders(record)) {
+                    if (Installer.has_portable_data(record)
+                        && Installer.sandbox_home_has_data(record)) {
+                        present_sandbox_migration_conflict((replace) => {
+                            installer.migrate_portable_to_sandbox(record, replace);
+                            apply_profile(picked);
+                        }, () => {
+                            sync_profile_row();
+                        });
+                        return;
+                    }
+                    installer.migrate_portable_to_sandbox(record, false);
+                }
+                apply_profile(picked);
+            });
+
+            // The parent page's status reads "Portable" whenever one of these folders
+            // exists, so it has to follow them. The record itself is untouched by a
+            // folder appearing or going, so this never needs a full commit().
+            UpdateFunc refresh_status = () => {
+                status_label.set_label(sandbox_status_label());
+            };
+
+            portable_home_row.notify["active"].connect(() => {
+                if (suppress) {
+                    return;
+                }
+                if (portable_home_row.active) {
+                    installer.create_portable_home(record);
+                    refresh_status();
+                } else if (Installer.has_portable_home(record)) {
+                    present_portable_folder_disable_confirm(portable_home_row, _(".home"),
+                        () => Installer.has_portable_home(record),
+                        () => {
+                            installer.remove_portable_home(record, false);
+                            refresh_status();
+                        });
+                }
+            });
+
+            portable_config_row.notify["active"].connect(() => {
+                if (suppress) {
+                    return;
+                }
+                if (portable_config_row.active) {
+                    installer.create_portable_config(record);
+                    refresh_status();
+                } else if (Installer.has_portable_config(record)) {
+                    present_portable_folder_disable_confirm(portable_config_row, _(".config"),
+                        () => Installer.has_portable_config(record),
+                        () => {
+                            installer.remove_portable_config(record, false);
+                            refresh_status();
+                        });
+                }
+            });
+
+            network_row.notify["active"].connect(() => on_permission_toggled());
+            audio_row.notify["active"].connect(() => on_permission_toggled());
+            display_row.notify["selected"].connect(() => on_permission_toggled());
+            dbus_row.notify["active"].connect(() => on_permission_toggled());
+            gpu_row.notify["active"].connect(() => on_permission_toggled());
+            camera_row.notify["active"].connect(() => on_permission_toggled());
+            input_row.notify["active"].connect(() => on_permission_toggled());
+            foreach (var row in service_rows.values) row.notify["active"].connect(() => on_permission_toggled());
+            downloads_row.notify["selected"].connect(() => on_permission_toggled());
+            documents_row.notify["selected"].connect(() => on_permission_toggled());
+            desktop_row.notify["selected"].connect(() => on_permission_toggled());
+            pictures_row.notify["selected"].connect(() => on_permission_toggled());
+            videos_row.notify["selected"].connect(() => on_permission_toggled());
+            music_row.notify["selected"].connect(() => on_permission_toggled());
+
+            add_folder_button.clicked.connect(() => {
+                var dialog = new Gtk.FileDialog();
+                dialog.title = _("Select Folder to Share");
+                dialog.modal = true;
+                dialog.select_folder.begin(this.get_root() as Gtk.Window, null, (obj, res) => {
+                    try {
+                        var folder = dialog.select_folder.end(res);
+                        var path = folder != null ? folder.get_path() : null;
+                        if (path == null || path.strip() == "") {
+                            return;
+                        }
+                        // Store the real target, not a symlink to it: what is bound and
+                        // what is shown then agree, and a symlink cannot be bound anyway.
+                        add_extra_dir(Core.SandboxConfig.canonicalize(path.strip()));
+                    } catch (Error e) {
+                        if (!(e is IOError.CANCELLED)) {
+                            warning("Failed to select sandbox folder: %s", e.message);
+                        }
+                    }
+                });
+            });
+
+            var toolbar = new Adw.ToolbarView();
+            toolbar.add_top_bar(new Adw.HeaderBar());
+            toolbar.set_content(prefs_page);
+
+            return new Adw.NavigationPage(toolbar, _("Privacy & Security"));
+        }
+
+        private Adw.ActionRow build_advanced_action_row() {
             var row = new Adw.ActionRow();
             row.title = _("Advanced Settings");
             row.subtitle = _("Change app icon, Startup WM Class, Keywords, $PATH or environment variables");
+            row.add_prefix(new Gtk.Image.from_icon_name("applications-engineering-symbolic"));
             var icon = new Gtk.Image.from_icon_name("go-next-symbolic");
             row.add_suffix(icon);
             row.activatable = true;
@@ -646,58 +1336,40 @@ namespace AppManager {
             return nav_page;
         }
 
-        private Adw.SwitchRow build_portable_home_row() {
-            return build_portable_folder_row(
-                _("Portable .home folder"),
-                _("Store the app's home directory in a .home folder next to the AppImage"),
-                _(".home"),
-                () => Installer.has_portable_home(record),
-                () => installer.create_portable_home(record),
-                () => installer.remove_portable_home(record, false)
-            );
-        }
-
-        private Adw.SwitchRow build_portable_config_row() {
-            return build_portable_folder_row(
-                _("Portable .config folder"),
-                _("Store the app's config in a .config folder next to the AppImage"),
-                _(".config"),
-                () => Installer.has_portable_config(record),
-                () => installer.create_portable_config(record),
-                () => installer.remove_portable_config(record, false)
-            );
-        }
-
         private delegate bool PortableHasFunc();
-        private delegate void PortableCreateFunc();
         private delegate void PortableRemoveFunc();
+        private delegate void MigrationChoiceFunc(bool replace);
+        private delegate void MigrationCancelFunc();
+        private delegate void UpdateFunc();
+        private delegate void CommitFunc(bool permission_edit);
+        private delegate void StringUpdateFunc(string value);
+        private delegate Adw.ActionRow EnvRowFunc(string? name, string? value, Gtk.Button add_button);
 
-        private Adw.SwitchRow build_portable_folder_row(
-            string title,
-            string subtitle,
-            string folder_label,
-            PortableHasFunc has_folder,
-            PortableCreateFunc create_folder,
-            PortableRemoveFunc remove_folder
-        ) {
-            var row = new Adw.SwitchRow();
-            row.title = title;
-            row.subtitle = subtitle;
-            row.active = has_folder();
-
-            row.notify["active"].connect(() => {
-                if (row.active) {
-                    if (!has_folder()) {
-                        create_folder();
-                    }
+        /**
+         * Asked when the portable folders and the sandboxed home both hold data, which
+         * happens when an app was sandboxed before, switched back, and used either way.
+         * There is no defensible default between the two, so neither is picked here.
+         */
+        private void present_sandbox_migration_conflict(MigrationChoiceFunc on_choice,
+                                                        MigrationCancelFunc on_cancel) {
+            var dialog = new Adw.AlertDialog(
+                _("This app already has sandbox data"),
+                _("Its portable folders and its sandboxed home both hold data. Merge keeps what is already in the sandbox and moves the rest in. Replace discards the sandboxed data and uses the portable folders instead.")
+            );
+            dialog.add_response("cancel", _("Cancel"));
+            dialog.add_response("merge", _("Merge"));
+            dialog.add_response("replace", _("Replace"));
+            dialog.set_response_appearance("replace", Adw.ResponseAppearance.DESTRUCTIVE);
+            dialog.set_close_response("cancel");
+            dialog.set_default_response("merge");
+            dialog.response.connect((response) => {
+                if (response == "cancel") {
+                    on_cancel();
                 } else {
-                    if (has_folder()) {
-                        present_portable_folder_disable_confirm(row, folder_label, has_folder, remove_folder);
-                    }
+                    on_choice(response == "replace");
                 }
             });
-
-            return row;
+            dialog.present(this);
         }
 
         private void present_portable_folder_disable_confirm(Adw.SwitchRow row, string folder_label, PortableHasFunc has_folder, PortableRemoveFunc remove_folder) {
@@ -736,7 +1408,7 @@ namespace AppManager {
             // Rebuild the record's env vars from current rows (in-memory only, no disk write).
             // Called on each keystroke while rows are alive; the .desktop write is deferred to
             // focus-leave / Enter via flush_env_vars(), which reads only the record.
-            void save_env_vars_from_rows() {
+            UpdateFunc save_env_vars_from_rows = () => {
                 var new_env_vars = new Gee.ArrayList<string>();
                 foreach (var widget in env_rows) {
                     if (widget is Adw.ActionRow) {
@@ -767,16 +1439,16 @@ namespace AppManager {
                     }
                 }
                 record.custom_env_vars = new_env_vars.size > 0 ? new_env_vars.to_array() : null;
-            }
+            };
 
             // Flush the current record to disk. Reads only the record (never the row widgets),
             // so it is safe to call from focus-leave even during window teardown.
-            void flush_env_vars() {
+            UpdateFunc flush_env_vars = () => {
                 persist_record_and_refresh_desktop();
-            }
+            };
 
             // Create a row for a single env var
-            Adw.ActionRow create_env_var_row(string? initial_name, string? initial_value, Gtk.Button add_button) {
+            EnvRowFunc create_env_var_row = (initial_name, initial_value, add_button) => {
                 var row = new Adw.ActionRow();
                 
                 var content_box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 6);
@@ -834,7 +1506,7 @@ namespace AppManager {
                 row.set_activatable(false);
                 
                 return row;
-            }
+            };
 
             // Add button row
             var add_row = new Adw.ActionRow();
@@ -906,6 +1578,7 @@ namespace AppManager {
          */
         private Adw.EntryRow build_customizable_entry_row(
             string title,
+            string icon_name,
             GetEffectiveFunc get_effective,
             GetOriginalFunc get_original,
             GetCustomFunc get_custom,
@@ -913,6 +1586,7 @@ namespace AppManager {
         ) {
             var row = new Adw.EntryRow();
             row.title = title;
+            row.add_prefix(new Gtk.Image.from_icon_name(icon_name));
             row.text = get_effective() ?? "";
             
             var restore_button = create_restore_button(get_custom() != null);
@@ -949,6 +1623,7 @@ namespace AppManager {
         private Adw.EntryRow build_name_row() {
             return build_customizable_entry_row(
                 _("App Name"),
+                "document-edit-symbolic",
                 () => record.get_effective_name(),
                 () => record.original_name,
                 () => record.custom_name,
@@ -963,6 +1638,7 @@ namespace AppManager {
         private Adw.EntryRow build_keywords_row() {
             return build_customizable_entry_row(
                 _("Keywords"),
+                "system-search-symbolic",
                 () => record.get_effective_keywords(),
                 () => record.original_keywords,
                 () => record.custom_keywords,
@@ -973,6 +1649,7 @@ namespace AppManager {
         private Adw.EntryRow build_icon_row() {
             return build_customizable_entry_row(
                 _("Icon name"),
+                "image-x-generic-symbolic",
                 () => record.get_effective_icon_name(),
                 () => record.original_icon_name,
                 () => record.custom_icon_name,
@@ -983,6 +1660,7 @@ namespace AppManager {
         private Adw.EntryRow build_wmclass_row() {
             return build_customizable_entry_row(
                 _("Startup WM Class"),
+                "window-new-symbolic",
                 () => record.get_effective_startup_wm_class(),
                 () => record.original_startup_wm_class,
                 () => record.custom_startup_wm_class,
@@ -993,16 +1671,17 @@ namespace AppManager {
         private Adw.EntryRow build_version_row() {
             var version_row = new Adw.EntryRow();
             version_row.title = _("Version");
+            version_row.add_prefix(new Gtk.Image.from_icon_name("package-x-generic-symbolic"));
             version_row.text = record.version ?? "";
             // Update the record on each keystroke (in-memory), defer the .desktop file write to
             // focus-leave / Enter. The flush reads only the record, so it is safe during teardown.
             version_row.changed.connect(() => {
                 record.version = version_row.text.strip() == "" ? null : version_row.text;
             });
-            void flush_version() {
+            UpdateFunc flush_version = () => {
                 registry.update(record);
                 installer.set_desktop_entry_property(record.desktop_file, "X-AppImage-Version", record.version ?? "");
-            }
+            };
             var version_focus = new Gtk.EventControllerFocus();
             version_focus.leave.connect(() => { flush_version(); });
             version_row.add_controller(version_focus);
@@ -1014,6 +1693,7 @@ namespace AppManager {
             var nodisplay_row = new Adw.SwitchRow();
             nodisplay_row.title = _("Hide from app drawer");
             nodisplay_row.subtitle = _("Don't show in application menu");
+            nodisplay_row.add_prefix(new Gtk.Image.from_icon_name("view-conceal-symbolic"));
             var nodisplay_current = desktop_props.get("NoDisplay") ?? "false";
             nodisplay_row.active = (nodisplay_current.down() == "true");
             nodisplay_row.notify["active"].connect(() => {
@@ -1028,6 +1708,7 @@ namespace AppManager {
             path_row = new Adw.SwitchRow();
             path_row.title = _("Add to $PATH");
             path_row.subtitle = _("Create a launcher in %s so you can run it from the terminal").printf(AppPaths.local_bin_dir);
+            path_row.add_prefix(new Gtk.Image.from_icon_name("utilities-terminal-symbolic"));
 
             var symlink_name = "";
 
@@ -1160,7 +1841,9 @@ namespace AppManager {
             delete_button.add_css_class("destructive-action");
             delete_button.clicked.connect(() => {
                 bool will_be_permanent = shift_held || record.mode == InstallMode.EXTRACTED || !is_path_trashable();
-                if (Installer.has_portable_folders(record)) {
+                // The sandboxed home counts too: for a sandboxed app it is all of the
+                // user data there is, so removing it silently is the worst option.
+                if (Installer.has_portable_folders(record) || Installer.has_sandbox_home(record)) {
                     present_portable_delete_dialog(will_be_permanent);
                 } else if (will_be_permanent) {
                     present_permanent_delete_warning();

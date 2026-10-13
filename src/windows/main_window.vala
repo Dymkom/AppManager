@@ -14,7 +14,7 @@ namespace AppManager {
         private Gtk.Box empty_state_box;
         private Gtk.Label empty_state_label;
         private Gee.ArrayList<Adw.PreferencesRow> app_rows;
-        private Gtk.ShortcutsWindow? shortcuts_window;
+        private Adw.Dialog? shortcuts_window;
         private Adw.NavigationView navigation_view;
         private Adw.ToastOverlay toast_overlay;
         private Adw.BottomSheet bottom_sheet;
@@ -291,6 +291,16 @@ namespace AppManager {
             var links_group = new Adw.PreferencesGroup();
             links_group.title = _("Find more AppImages");
             links_group.description = _("Browse these sources to discover and download AppImages");
+
+            var apphub_row = new Adw.ActionRow();
+            apphub_row.title = "<b>%s</b>".printf(GLib.Markup.escape_text(_("AppHub (Recommended)")));
+            apphub_row.subtitle = "xlc-dev.github.io/apphub";
+            apphub_row.activatable = true;
+            apphub_row.add_suffix(new Gtk.Image.from_icon_name("external-link-symbolic"));
+            apphub_row.activated.connect(() => {
+                UiUtils.open_url("https://xlc-dev.github.io/apphub/");
+            });
+            links_group.add(apphub_row);
 
             var pkgforge_row = new Adw.ActionRow();
             pkgforge_row.title = "Anylinux AppImages";
@@ -570,23 +580,50 @@ namespace AppManager {
             return a.name.collate(b.name);
         }
 
+        private Gtk.Box build_app_name_box(Gtk.Label name_label, bool sandboxed) {
+            var name_box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 6);
+            if (sandboxed) name_box.append(UiUtils.sandbox_indicator());
+            name_box.append(name_label);
+            return name_box;
+        }
+
         private void populate_group(Adw.PreferencesGroup group, Gee.ArrayList<InstallationRecord> records) {
             foreach (var record in records) {
                 var row = new Adw.ActionRow();
-                row.title = record.name;
+                row.update_property(Gtk.AccessibleProperty.LABEL, record.name, -1);
                 if (record.mode == InstallMode.EXTRACTED) {
                     row.add_css_class("extracted-app");
                 }
                 
-                row.subtitle = build_row_subtitle(record);
-
-                // Add icon if available
-                if (record.icon_path != null && record.icon_path.strip() != "") {
-                    var icon_image = UiUtils.load_app_icon(record.icon_path);
-                    if (icon_image != null) {
-                        row.add_prefix(icon_image);
-                    }
+                var icon_image = record.icon_path != null && record.icon_path.strip() != ""
+                    ? UiUtils.load_app_icon(record.icon_path) : null;
+                if (icon_image == null) {
+                    icon_image = new Gtk.Image.from_icon_name("application-x-executable-symbolic");
+                    icon_image.pixel_size = 48;
                 }
+                var name_label = new Gtk.Label(record.name);
+                name_label.xalign = 0;
+                name_label.ellipsize = Pango.EllipsizeMode.END;
+                var name_box = build_app_name_box(name_label, record.sandbox_enabled());
+                name_box.add_css_class("title");
+
+                var text_box = new Gtk.Box(Gtk.Orientation.VERTICAL, 0);
+                text_box.valign = Gtk.Align.CENTER;
+                text_box.append(name_box);
+
+                var subtitle = build_row_subtitle(record);
+                if (subtitle != "") {
+                    var subtitle_label = new Gtk.Label(subtitle);
+                    subtitle_label.xalign = 0;
+                    subtitle_label.ellipsize = Pango.EllipsizeMode.END;
+                    subtitle_label.add_css_class("subtitle");
+                    subtitle_label.add_css_class("dim-label");
+                    text_box.append(subtitle_label);
+                    row.update_property(Gtk.AccessibleProperty.DESCRIPTION, subtitle, -1);
+                }
+                row.add_prefix(text_box);
+                // add_prefix prepends, so add the icon last to keep it first.
+                row.add_prefix(icon_image);
 
                 // Make row activatable to show detail page
                 row.activatable = true;
@@ -705,7 +742,9 @@ namespace AppManager {
             name_label.set_max_width_chars(16);
             name_label.set_justify(Gtk.Justification.CENTER);
             name_label.set_halign(Gtk.Align.CENTER);
-            cell_box.append(name_label);
+            var name_box = build_app_name_box(name_label, record.sandbox_enabled());
+            name_box.halign = Gtk.Align.CENTER;
+            cell_box.append(name_box);
 
             // Size line
             var size_text = format_record_size(record);
@@ -750,12 +789,9 @@ namespace AppManager {
                 var mask = keyboard.get_modifier_state();
                 if (Gdk.ModifierType.SHIFT_MASK in mask) {
                     // Launch the app with icon spin animation
-                    var icon_overlay = cell_box.get_first_child();
-                    if (icon_overlay != null) {
-                        var icon_widget = icon_overlay.get_first_child();
-                        if (icon_widget != null) {
-                            UiUtils.spin_launch_icon(icon_widget);
-                        }
+                    var icon_widget = cell_box.get_first_child();
+                    if (icon_widget != null) {
+                        UiUtils.spin_launch_icon(icon_widget);
                     }
                     launch_app(record);
                     return;
@@ -887,8 +923,7 @@ namespace AppManager {
             if (shortcuts_window == null) {
                 return;
             }
-            shortcuts_window.set_transient_for(this);
-            shortcuts_window.present();
+            shortcuts_window.present(this);
         }
 
         private GLib.MenuModel build_menu_model() {
@@ -1741,25 +1776,9 @@ namespace AppManager {
         private bool has_only_self_records(InstallationRecord[] records) {
             if (records.length == 0) return false;
             foreach (var rec in records) {
-                if (!is_self_app_record(rec)) return false;
+                if (!rec.is_self_app()) return false;
             }
             return true;
-        }
-
-        /**
-         * Heuristic: does this record look like AppManager itself?
-         * Checks the app name and desktop file path for "appmanager".
-         */
-        private bool is_self_app_record(InstallationRecord record) {
-            if (record.name != null) {
-                var name = record.name.strip().down().replace(" ", "").replace("-", "");
-                if (name.has_prefix("appmanager")) return true;
-            }
-            if (record.desktop_file != null &&
-                    record.desktop_file.down().contains("appmanager")) {
-                return true;
-            }
-            return false;
         }
 
         private string record_state_key(InstallationRecord record) {
@@ -1862,22 +1881,26 @@ namespace AppManager {
             try {
                 var builder = new Gtk.Builder();
                 builder.add_from_resource(SHORTCUTS_RESOURCE);
-                shortcuts_window = builder.get_object("shortcuts_window") as Gtk.ShortcutsWindow;
+                shortcuts_window = builder.get_object("shortcuts_window") as Adw.Dialog;
                 if (shortcuts_window == null) {
                     warning("Failed to create shortcuts window");
                     return;
                 }
-                shortcuts_window.set_transient_for(this);
+                shortcuts_window.title = _("Keyboard shortcuts");
+                // Adw.Dialog disposes its presentation window on close; rebuild on the next visit.
+                shortcuts_window.closed.connect(() => {
+                    shortcuts_window = null;
+                });
 
-                var section = builder.get_object("general_section") as Gtk.ShortcutsSection;
+                var section = builder.get_object("general_section") as Adw.PreferencesPage;
                 if (section != null) {
                     section.title = _("General");
                 }
-                var navigation = builder.get_object("navigation_group") as Gtk.ShortcutsGroup;
+                var navigation = builder.get_object("navigation_group") as Adw.PreferencesGroup;
                 if (navigation != null) {
                     navigation.title = _("Navigation");
                 }
-                var window_group = builder.get_object("window_group") as Gtk.ShortcutsGroup;
+                var window_group = builder.get_object("window_group") as Adw.PreferencesGroup;
                 if (window_group != null) {
                     window_group.title = _("Window");
                 }
@@ -1896,7 +1919,7 @@ namespace AppManager {
         }
 
         private void assign_shortcut_title(Gtk.Builder builder, string id, string title) {
-            var shortcut = builder.get_object(id) as Gtk.ShortcutsShortcut;
+            var shortcut = builder.get_object(id) as Adw.ActionRow;
             if (shortcut != null) {
                 shortcut.title = title;
             }

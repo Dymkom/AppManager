@@ -19,7 +19,7 @@
     <key name="auto-check-updates" type="b">
       <default>false</default>
       <summary>Automatically check for updates in background</summary>
-      <description>When enabled, AppManager will periodically check for AppImage updates using the XDG Background Portal</description>
+      <description>When enabled, AppManager will periodically check for AppImage updates from a background service started at login</description>
     </key>
     <key name="update-check-interval" type="i">
       <default>86400</default>
@@ -100,6 +100,16 @@
       <default>''</default>
       <summary>Encrypted GitHub token (tier-2 fallback)</summary>
       <description>Machine+user-bound AES-256-GCM blob holding the GitHub token, used only when no freedesktop Secret Service is available. Prefixed 'AMTC1:'. Useless off its origin machine. See TokenStore / crypto_shim.</description>
+    </key>
+    <key name="default-sandbox-enabled" type="b">
+      <default>false</default>
+      <summary>Sandbox newly installed apps by default</summary>
+      <description>When enabled, new installations outside AppHub start on the Standard sandbox profile. AppHub downloads use their verified store template. Existing apps are never changed by this setting.</description>
+    </key>
+    <key name="sandbox-global-dirs" type="as">
+      <default>[]</default>
+      <summary>Folders granted to every sandboxed app</summary>
+      <description>Folder paths every sandboxed app may read and write, in addition to its own permissions. Each entry may carry a ':rw' suffix for write access.</description>
     </key>
   </schema>
 </schemalist>

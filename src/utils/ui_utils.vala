@@ -15,6 +15,16 @@ namespace AppManager.Utils {
         // Cache loaded textures to avoid re-reading from disk on every refresh
         private static Gee.HashMap<string, Gdk.Paintable>? texture_cache = null;
 
+        public static Gtk.Image sandbox_indicator() {
+            var image = new Gtk.Image.from_icon_name("security-high-symbolic");
+            image.pixel_size = 16;
+            image.valign = Gtk.Align.CENTER;
+            image.tooltip_text = _("Sandboxed");
+            image.update_property(Gtk.AccessibleProperty.LABEL, _("Sandboxed"), -1);
+            image.add_css_class("sandbox-indicator");
+            return image;
+        }
+
         private static Gee.HashMap<string, Gdk.Paintable> get_texture_cache() {
             if (texture_cache == null) {
                 texture_cache = new Gee.HashMap<string, Gdk.Paintable>();

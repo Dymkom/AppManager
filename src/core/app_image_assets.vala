@@ -401,8 +401,16 @@ namespace AppManager.Core {
             return find_summary_in_dir_recursive(metainfo_root);
         }
 
+        public static string? extract_appstream_id(string appimage_path, string temp_root, string desktop_id, string? app_name) {
+            var selector = new AppStreamIdentity(desktop_id, app_name);
+            selector.add_directory(ensure_metainfo_extracted(appimage_path, temp_root));
+            return selector.matched_id();
+        }
+
         private static string ensure_metainfo_extracted(string appimage_path, string temp_root) {
             var metainfo_root = Path.build_filename(temp_root, "metainfo");
+            var marker = Path.build_filename(metainfo_root, ".extracted");
+            if (GLib.FileUtils.test(marker, FileTest.EXISTS)) return metainfo_root;
             DirUtils.create_with_parents(metainfo_root, 0755);
 
             string[] patterns = {
@@ -415,6 +423,12 @@ namespace AppManager.Core {
 
             foreach (var pattern in patterns) {
                 extract_entry(appimage_path, metainfo_root, pattern);
+            }
+
+            try {
+                GLib.FileUtils.set_contents(marker, "");
+            } catch (FileError e) {
+                debug("Could not mark metainfo extraction: %s", e.message);
             }
 
             return metainfo_root;

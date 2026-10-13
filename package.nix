@@ -17,16 +17,22 @@
 , libsecret
 , gnutls
 , zstd
+, libseccomp
+, wayland
+, wayland-scanner
 , squashfsTools
 , squashfuse
 , dwarfs
 , zsync
+, bubblewrap
+, xdg-dbus-proxy
 }:
 
 stdenv.mkDerivation(finalAttrs: {
   pname = "app-manager";
   version = let
-  	match = builtins.match ".*version: '([0-9.]+)'.*" (builtins.readFile ./meson.build);
+    # Match only the project version, including prerelease suffixes.
+    match = builtins.match ".*project\\([^)]*[[:space:]]version: '([^']+)'.*" (builtins.readFile ./meson.build);
   in lib.head match;
 
   src = ./.;
@@ -40,6 +46,7 @@ stdenv.mkDerivation(finalAttrs: {
     gobject-introspection
     wrapGAppsHook4
     makeWrapper
+    wayland-scanner
   ];
 
   buildInputs = [
@@ -52,12 +59,18 @@ stdenv.mkDerivation(finalAttrs: {
     libsecret
     gnutls
     zstd
+    # Sandbox hardening: seccomp filter and Wayland security context.
+    libseccomp
+    wayland
   ];
 
   mesonFlags = [
     "-Dbundle_dwarfs=false"
     "-Dbundle_zsync=false"
     "-Dbundle_unsquashfs=false"
+    "-Dbundle_squashfuse=false"
+    "-Dseccomp=enabled"
+    "-Dwayland_security_context=enabled"
   ];
 
   dontWrapGApps = true;
@@ -68,6 +81,9 @@ stdenv.mkDerivation(finalAttrs: {
       squashfuse
       dwarfs
       zsync
+      # Sandbox runtime dependencies, resolved from PATH at launch.
+      bubblewrap
+      xdg-dbus-proxy
     ];
   in ''
     wrapProgram $out/bin/app-manager \

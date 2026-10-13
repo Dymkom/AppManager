@@ -22,21 +22,35 @@ AppManager doesn't require FUSE to run, thanks to the [uruntime](https://github.
 ## Features
 
 - **Drag-and-drop installer**: Mimics the familiar macOS Applications install flow.
-- **Smart install modes**: Can choose between portable (move the AppImage) and extracted (unpack to `~/Applications/.installed/AppRun`) while letting you override it.
-- **True isolated portable mode**: Optionally creates `.home` and `.config` folders next to the AppImage so the app stores all its data alongside itself — fully self-contained and portable.
+- **Portable or extracted**: Apps are installed portable (the AppImage is moved to `~/Applications`). From the app's details you can extract it to `~/Applications/.installed/<app>/` instead.
+- **True isolated portable mode**: Optionally creates `.home` and `.config` folders next to the AppImage so the app stores all its data alongside itself - fully self-contained and portable.
 - **Side-by-side installs**: Install multiple copies or versions of the same app; extra copies get a numbered suffix (e.g. `Bitwarden` and `Bitwarden 2`) with their own desktop entries and icons.
 - **Desktop integration**: Extracts the bundled `.desktop` file via `unsquashfs` or `dwarfsextract`, rewrites `Exec` and `Icon`, and stores it in `~/.local/share/applications`.
 - **Simple uninstall**: Right click in app drawer and choose `Move to Trash`, can uninstall in AppManager or simply delete from `~/Applications` folder.
-- **One-click installs from the web**: Registers the `x-scheme-handler/appimg` handler, so an `appimg://install?url=…&sha256=…` link on a store page (e.g. [AppHub](https://xlc-dev.github.io/apphub/)) downloads the AppImage — only over HTTPS, verified against the size and SHA-256 in the link — and hands it to the normal install flow.
-- **Install registry + preferences**: Main window lists installed apps, default mode, and cleanup behaviors, all stored with GSettings.
-- **Background app updates**: Optional automatic update checks with configurable interval (daily, weekly, monthly) and notifications when updates are found.
+- **One-click installs from the web**: Registers the `x-scheme-handler/appimg` handler, so an `appimg://install?url=…&sha256=…` link downloads the AppImage over HTTPS and verifies the supplied SHA-256 and size. Downloads matching [AppHub](https://xlc-dev.github.io/apphub/)'s catalog receive the app's sandbox template; other downloads use your normal installation defaults.
+- **App library**: The main window lists installed apps with search, sorting and list or grid views. Changing the install folder in Preferences moves the installed apps along.
+- **Update sources**: zsync delta updates from the AppImage's embedded update info, GitHub and GitLab releases (optionally including pre-releases), or a plain download link checked for changes.
+- **Background app updates**: Optional automatic update checks with configurable interval (daily, weekly, monthly), notifications when updates are found, and optional automatic installs. Each run is written to an update log.
+- **Per-app customization**: Rename an app, change its icon, keywords or `StartupWMClass`, add launch arguments and environment variables, hide it from the app drawer, or add it to `$PATH`. These settings survive updates.
 - **GitHub authentication**: Optionally store a GitHub personal access token to raise the API rate limit from 60 to 5,000 requests per hour. The token is kept in the system keyring (GNOME Keyring, KWallet, KeePassXC) when a Secret Service is available, and otherwise in an AES-256-GCM blob bound to the machine and user account, so a synced or copied config file is useless elsewhere.
+- **Per-app sandboxing**: Give each app a private home and control its access to personal files, network, sound, devices and desktop services. Choose a preset, customize permissions, or use an AppHub template. See the [sandboxing guide](sandboxing/README.md).
+
+## Sandboxing
+
+Run portable AppImages with a private home and configurable access to your files,
+network, devices and desktop services. Choose **Standard** or **Strict** in an
+app's **Privacy & Security** settings, or use its AppHub template.
+
+See the [sandboxing guide](sandboxing/README.md) for setup, profiles, requirements
+and known limitations.
 
 ## Requirements
 
-- `valac`, `meson`, `ninja`
-- Libraries: `libadwaita-1` (>= 1.6), `gtk4`, `gio-2.0`, `glib-2.0`, `gmodule-2.0`, `json-glib-1.0`, `gee-0.8`, `libsoup-3.0`, `libsecret-1`, `gnutls` (>= 3.6.13)
-- Runtime tools: `unsquashfs`, `dwarfsextract`
+- `valac`, `meson` (>= 0.64), `ninja`, `gettext`, `glib-compile-schemas`
+- Libraries: `libadwaita-1` (>= 1.6), `gtk4`, `glib-2.0` (>= 2.74), `gio-2.0`, `gio-unix-2.0`, `gmodule-2.0`, `json-glib-1.0`, `gee-0.8`, `libsoup-3.0`, `libsecret-1`, `gnutls` (>= 3.6.13)
+- Optional, for sandbox hardening: `libseccomp` (syscall filtering), `wayland-client` plus `wayland-scanner` (compositor-side isolation). Both are found automatically and can be turned off with `-Dseccomp=disabled` and `-Dwayland_security_context=disabled`.
+- Runtime tools: `unsquashfs`, `dwarfsextract`; optionally `zsync2` (or `zsync`) for delta updates
+- Runtime tools for sandboxing: `bwrap`, `xdg-dbus-proxy`, `fusermount3`, `squashfuse`, `dwarfs`
 
 ## Install
 
@@ -73,20 +87,22 @@ Install the development packages required to build AppManager on each distributi
 - **Debian / Ubuntu:**
 
 ```bash
-sudo apt install valac meson ninja-build pkg-config libadwaita-1-dev libgtk-4-dev libglib2.0-dev libjson-glib-dev libgee-0.8-dev libgirepository1.0-dev libsoup-3.0-dev cmake desktop-file-utils jq libzstd-dev
+sudo apt install valac meson ninja-build pkg-config gettext libadwaita-1-dev libgtk-4-dev libglib2.0-dev libjson-glib-dev libgee-0.8-dev libsoup-3.0-dev libsecret-1-dev libgnutls28-dev libseccomp-dev libwayland-dev curl zlib1g-dev liblzma-dev libzstd-dev
 ```
 
 - **Fedora:**
 
 ```bash
-sudo dnf install vala meson ninja-build gtk4-devel libadwaita-devel glib2-devel json-glib-devel libgee-devel libsoup3-devel cmake desktop-file-utils jq libzstd-devel
+sudo dnf install vala meson ninja-build gettext gtk4-devel libadwaita-devel glib2-devel json-glib-devel libgee-devel libsoup3-devel libsecret-devel gnutls-devel libseccomp-devel wayland-devel curl zlib-devel xz-devel libzstd-devel
 ```
 
 - **Arch Linux / Manjaro:**
 
 ```bash
-sudo pacman -S vala meson ninja gtk4 libadwaita glib2 json-glib libgee libsoup cmake desktop-file-utils jq libzstd-devel
+sudo pacman -S vala meson ninja gettext gtk4 libadwaita glib2 json-glib libgee libsoup3 libsecret gnutls libseccomp wayland curl zlib xz zstd
 ```
+
+`curl` and the zlib/xz/zstd headers are only needed for the bundled tools described below.
 
 </details>
 
@@ -103,16 +119,19 @@ meson compile -C build
 meson install -C build
 ```
 
+By default the build bundles its helper tools: it downloads `dwarfsextract` and the `dwarfs` FUSE driver, `zsync2` and `squashfuse`, and compiles `unsquashfs` from source. This needs network access. To use the host's tools instead, pass any of `-Dbundle_dwarfs=false`, `-Dbundle_zsync=false`, `-Dbundle_squashfuse=false`, `-Dbundle_unsquashfs=false`.
+
 ## CLI helpers
 
+- Open the installer window for a file: `app-manager /path/to/app.AppImage`
 - Install an AppImage: `app-manager install /path/to/app.AppImage`
 - Install side by side, keeping the existing app: `app-manager install --keep-both /path/to/app.AppImage`
-- Uninstall by path or checksum: `app-manager uninstall /path/or/checksum`
-- Update a single installed AppImage: `app-manager update /path/or/checksum`
+- Uninstall by path: `app-manager uninstall /path/to/app.AppImage`
+- Update a single installed AppImage: `app-manager update /path/to/app.AppImage`
 - Update all installed AppImages: `app-manager --update-all`
 - List available updates (no install): `app-manager --update-check`
 - Check if installed: `app-manager --is-installed /path/to/app.AppImage`
-- Run a background update check: `app-manager --background-update`
+- Run the background update service (started by its autostart entry): `app-manager --background-update`
 - Show version or help: `app-manager --version` / `app-manager --help`
 - Open a web install link: `app-manager 'appimg://install?url=https://host/App.AppImage&sha256=<hex>'`
 
@@ -120,7 +139,7 @@ meson install -C build
 
 AppManager supports multiple languages. Want to help translate to your language? See the [translation guide](po/README.md) for instructions.
 
-Currently supported: German, Spanish, Estonian, Finnish, French, Italian, Japanese, Lithuanian, Latvian, Norwegian, Portuguese (Brazil), Swedish, Chinese (Simplified).
+Currently supported: Arabic, Chinese (Simplified), Dutch, Estonian, Finnish, French, German, Greek, Irish, Italian, Japanese, Kazakh, Korean, Latvian, Lithuanian, Norwegian Bokmål, Polish, Portuguese (Brazil), Spanish, Swedish, Ukrainian, Vietnamese.
 
 ## Reviews
 

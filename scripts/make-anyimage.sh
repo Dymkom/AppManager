@@ -99,12 +99,20 @@ else
     /tmp/get-debloated-pkgs.sh --add-common --prefer-nano
 fi
 
+# The debloated gtk4 can lag behind the repo libadwaita (aarch64 gtk4-mini
+# 4.22.5 vs libadwaita needing >= 4.23.1). Fall back to the repo gtk4 then.
+if ! pkg-config --exists libadwaita-1; then
+    echo "Debloated gtk4 too old for libadwaita, reinstalling repo gtk4..."
+    pacman -S --noconfirm gtk4
+fi
+
 # ── Build and install app-manager ────────────────────────────────────
 echo "Building app-manager..."
 echo "---------------------------------------------------------------"
 # Use a separate build dir to avoid conflicts with the host build/
 rm -rf build-anyimage
 meson setup build-anyimage --prefix=/usr \
+    -Dbuild_tests=false \
     -Dbundle_dwarfs=true \
     -Dbundle_zsync=true \
     -Dbundle_unsquashfs=false
@@ -157,12 +165,19 @@ echo "---------------------------------------------------------------"
 #
 # Additional notes:
 #   - unsquashfs is provided by the squashfs-tools Arch package (installed via pacman)
+#   - squashfuse and dwarfs are the FUSE *drivers* the sandbox mounts AppImages with,
+#     which is a different job from the unsquashfs/dwarfsextract extractors above
+#   - bwrap and xdg-dbus-proxy are deliberately NOT bundled: bwrap may be setuid on
+#     some distros and bundling breaks that, and the proxy links the host's glib.
+#     Both are host runtime dependencies, packaged by every major distro.
 
 "$QS" \
     /usr/bin/app-manager \
     /usr/bin/dwarfsextract \
     /usr/bin/zsync2 \
-    /usr/bin/unsquashfs
+    /usr/bin/unsquashfs \
+    /usr/bin/squashfuse \
+    /usr/bin/dwarfs
 
 #   - GIO modules for TLS and proxy are needed since the app uses libsoup3 for networking
 #   - this has been fixed upstream, but let's keep an eye on it https://github.com/pkgforge-dev/Anylinux-AppImages/pull/340

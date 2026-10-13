@@ -40,6 +40,9 @@ namespace AppManager.Core {
         // Download progress, polled by the UI while the transfer runs.
         public int64 received_bytes = 0;
         public int64 total_bytes = -1;
+        public bool checking_policy = false;
+        public AppHubPolicy? sandbox_policy { get; private set; }
+        public string? apphub_id { get; private set; }
 
         private AppimgLink() {
             size = -1;
@@ -48,7 +51,9 @@ namespace AppManager.Core {
         public static AppimgLink parse(string link) throws AppimgLinkError {
             Uri uri;
             try {
-                uri = Uri.parse(link, UriFlags.NONE);
+                // parse_params performs the query decoding. Decoding here too changes
+                // artifact URLs (%40 release tags and nested query parameters).
+                uri = Uri.parse(link, UriFlags.ENCODED_QUERY);
             } catch (Error e) {
                 throw new AppimgLinkError.INVALID_LINK(_("This is not a valid install link."));
             }
@@ -102,6 +107,10 @@ namespace AppManager.Core {
             result.name = clean_text(params.lookup("name"));
             result.version = clean_text(params.lookup("version"));
             result.filename = derive_filename(target.get_path());
+            result.apphub_id = clean_text(params.lookup("apphub-id"));
+            if (result.apphub_id != null && !AppHubPolicy.valid_id(result.apphub_id)) {
+                throw new AppimgLinkError.INVALID_LINK(_("The install link carries an invalid AppHub application ID."));
+            }
 
             var raw_sha256 = params.lookup("sha256");
             if (raw_sha256 != null && raw_sha256.strip() != "") {
@@ -134,6 +143,8 @@ namespace AppManager.Core {
             var dest_path = Path.build_filename(dest_dir, filename);
             received_bytes = 0;
             total_bytes = size;
+            sandbox_policy = null;
+            checking_policy = false;
 
             var session = new Soup.Session();
             session.user_agent = "AppManager/%s".printf(APPLICATION_VERSION);
@@ -180,6 +191,14 @@ namespace AppManager.Core {
                         throw new AppimgLinkError.CHECKSUM_MISMATCH(
                             _("The downloaded file does not match the checksum in the install link."));
                     }
+                    // Store links currently carry no origin. The official catalog's
+                    // exact URL + digest is the provenance check, not the asset host.
+                    checking_policy = true;
+                    sandbox_policy = AppHubPolicy.resolve(url, checksum.get_string(), apphub_id, cancellable);
+                    if (apphub_id != null && sandbox_policy == null) {
+                        throw new AppHubPolicyError.ARTIFACT_MISMATCH(_("The AppHub sandbox policy could not be matched to this download."));
+                    }
+                    checking_policy = false;
                 });
             } catch (Error e) {
                 try {

@@ -16,10 +16,10 @@ app_resources = gnome.compile_resources('app-manager-resources',
   c_name: 'app_manager'
 )
 
-executable('app-manager',
+app_executable = executable('app-manager',
   core_sources + app_sources + app_resources,
   dependencies: [adw_dep, gtk_dep, gio_dep, gio_unix_dep, glib_dep, gmodule_dep, json_glib_dep, gee_dep, libsoup_dep, libsecret_dep],
-  link_with: crypto_shim_lib,
+  link_with: [crypto_shim_lib, seccomp_filter_lib, wayland_sc_lib],
   include_directories: crypto_shim_inc,
   install: true
 )

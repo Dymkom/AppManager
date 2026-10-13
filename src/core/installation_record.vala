@@ -34,6 +34,11 @@ namespace AppManager.Core {
         public int copy_index { get; set; default = 0; }
         public string? version { get; set; }
         public string? description { get; set; }  // App description from metainfo <summary> or desktop Comment
+        public string? appstream_id { get; set; }
+        public bool appstream_checked { get; set; default = false; }
+        public string? apphub_id { get; set; }
+        public string? apphub_policy { get; set; }
+        public bool apphub_policy_customized { get; set; default = false; }
         public string? last_modified { get; set; }  // HTTP Last-Modified header for change detection
         public int64 content_length { get; set; default = 0; }  // HTTP Content-Length for change detection
         public string? last_release_tag { get; set; }  // Stores release tag_name for apps without version
@@ -87,6 +92,136 @@ namespace AppManager.Core {
         // Whether to include pre-release versions when checking for updates (GitHub only)
         public bool prerelease_enabled { get; set; default = false; }
         public bool updates_enabled { get; set; default = true; }
+
+        // Sandbox configuration. sandbox_profile is "off" | "standard" | "strict" | "custom";
+        // null is treated as "off" and nothing is wrapped. The sandbox_allow_* toggles carry
+        // the real state - the profile only labels which preset was last applied. Every
+        // toggle reads as a permission: true means the app IS allowed the thing, matching
+        // the UI switches one-for-one. Honored only while sandbox_enabled().
+        //
+        // There is deliberately no microphone toggle: one PulseAudio/PipeWire connection
+        // carries capture and playback together, so sandbox_allow_audio covers both and
+        // the UI says so.
+        public string? sandbox_profile { get; set; }
+        public bool sandbox_allow_network { get; set; default = true; }
+        // Unfiltered session bus. Named "dbus" for serialization compatibility; the UI
+        // calls it "Full session bus" because that is what granting it means - with it
+        // on, the session bus is unfiltered; system-bus permissions stay independent.
+        public bool sandbox_allow_dbus { get; set; default = false; }
+        public bool sandbox_allow_audio { get; set; default = true; }
+        // Legacy X11 access. Defaults on: without it any app pinned to X11 fails to
+        // start on a Wayland session.
+        public bool sandbox_allow_x11 { get; set; default = true; }
+        // Hardware rendering: the GPU device nodes. On by default - software rendering
+        // makes most apps unusable without materially improving isolation.
+        public bool sandbox_allow_gpu { get; set; default = true; }
+        // Direct V4L2 camera device access: the /dev/video* nodes are bound into the
+        // sandbox. The only camera path there is, now that portals are gone.
+        public bool sandbox_allow_camera { get; set; default = false; }
+        // Game controllers: /dev/input. Off by default - that tree carries keyboards
+        // and mice too, so granting it hands the app a keylogger.
+        public bool sandbox_allow_input { get; set; default = false; }
+        // System-bus BlueZ access, for apps that talk to Bluetooth devices directly.
+        public bool sandbox_allow_bluetooth { get; set; default = false; }
+        // org.freedesktop.Notifications access through the filtered session bus. The
+        // only notification path there is, now that portals are gone.
+        public bool sandbox_allow_notifications { get; set; default = true; }
+        // StatusNotifierItem tray icons. Media controls are independent.
+        public bool sandbox_allow_tray { get; set; default = true; }
+        public bool sandbox_allow_media_controls { get; set; default = true; }
+        public bool sandbox_allow_accessibility { get; set; default = true; }
+        public string[]? sandbox_media_names { get; set; }
+        // Location. Reaches GeoClue2 on the system bus through the filtered proxy.
+        public bool sandbox_allow_location { get; set; default = false; }
+        public bool sandbox_allow_network_info { get; set; default = false; }
+        // Stable sandbox identity, generated once when sandboxing is first enabled and
+        // carried across upgrades: the compositor's security context and the sandbox
+        // cache dir are keyed by it, so it must never change under an app.
+        public string? sandbox_app_id { get; set; }
+        public bool sandbox_allow_downloads { get; set; default = true; }
+        public bool sandbox_allow_documents { get; set; default = false; }
+        public bool sandbox_allow_desktop { get; set; default = false; }
+        public bool sandbox_allow_pictures { get; set; default = false; }
+        public bool sandbox_allow_videos { get; set; default = false; }
+        public bool sandbox_allow_music { get; set; default = false; }
+        // The issue #37 "manual override": extra paths the app may read. An entry
+        // ending in ":rw" is granted write access too.
+        public string[]? sandbox_extra_dirs { get; set; }
+        public string[]? sandbox_read_only_dirs { get; set; }
+        public string[]? sandbox_other_dirs { get; set; }
+        public string? sandbox_display { get; set; }
+        public bool sandbox_share_processes { get; set; default = false; }
+        public bool sandbox_share_ipc { get; set; default = false; }
+        // Null bus mode retains legacy semantic toggles and automatic own names.
+        public string? sandbox_session_bus { get; set; }
+        public string? sandbox_system_bus { get; set; }
+        public string[]? sandbox_session_rules { get; set; }
+        public string[]? sandbox_system_rules { get; set; }
+        public string[]? sandbox_extra_devices { get; set; }
+
+        /**
+         * True when this record should be launched through the sandbox.
+         */
+        public bool sandbox_enabled() {
+            return sandbox_profile != null
+                && sandbox_profile != ""
+                && sandbox_profile != SANDBOX_PROFILE_OFF;
+        }
+
+        public bool is_self_app() {
+            return original_startup_wm_class == APPLICATION_ID
+                || (desktop_file != null
+                    && Path.get_basename(desktop_file) == APPLICATION_ID + ".desktop");
+        }
+
+        /**
+         * Copies the whole sandbox block from another record. Used when an upgrade
+         * builds a fresh record for the same app: permissions the user granted must
+         * survive, and sandbox_app_id especially so - the Wayland security context and
+         * the sandbox cache dir are keyed by it.
+         *
+         * Kept here rather than spelled out at the call site so a new toggle only has
+         * to be added in this file.
+         */
+        public void copy_sandbox_from(InstallationRecord other) {
+            sandbox_profile             = other.sandbox_profile;
+            sandbox_app_id              = other.sandbox_app_id;
+            sandbox_allow_network       = other.sandbox_allow_network;
+            sandbox_allow_dbus          = other.sandbox_allow_dbus;
+            sandbox_allow_audio         = other.sandbox_allow_audio;
+            sandbox_allow_x11           = other.sandbox_allow_x11;
+            sandbox_allow_gpu           = other.sandbox_allow_gpu;
+            sandbox_allow_camera        = other.sandbox_allow_camera;
+            sandbox_allow_input         = other.sandbox_allow_input;
+            sandbox_allow_bluetooth     = other.sandbox_allow_bluetooth;
+            sandbox_allow_notifications = other.sandbox_allow_notifications;
+            sandbox_allow_tray          = other.sandbox_allow_tray;
+            sandbox_allow_media_controls = other.sandbox_allow_media_controls;
+            sandbox_allow_accessibility = other.sandbox_allow_accessibility;
+            sandbox_media_names = other.sandbox_media_names;
+            sandbox_allow_location      = other.sandbox_allow_location;
+            sandbox_allow_network_info  = other.sandbox_allow_network_info;
+            sandbox_allow_downloads     = other.sandbox_allow_downloads;
+            sandbox_allow_documents     = other.sandbox_allow_documents;
+            sandbox_allow_desktop       = other.sandbox_allow_desktop;
+            sandbox_allow_pictures      = other.sandbox_allow_pictures;
+            sandbox_allow_videos        = other.sandbox_allow_videos;
+            sandbox_allow_music         = other.sandbox_allow_music;
+            sandbox_extra_dirs          = other.sandbox_extra_dirs;
+            sandbox_read_only_dirs      = other.sandbox_read_only_dirs;
+            sandbox_other_dirs          = other.sandbox_other_dirs;
+            sandbox_display             = other.sandbox_display;
+            sandbox_share_processes     = other.sandbox_share_processes;
+            sandbox_share_ipc           = other.sandbox_share_ipc;
+            sandbox_session_bus         = other.sandbox_session_bus;
+            sandbox_system_bus          = other.sandbox_system_bus;
+            sandbox_session_rules       = other.sandbox_session_rules;
+            sandbox_system_rules        = other.sandbox_system_rules;
+            sandbox_extra_devices       = other.sandbox_extra_devices;
+            apphub_id                   = other.apphub_id;
+            apphub_policy               = other.apphub_policy;
+            apphub_policy_customized    = other.apphub_policy_customized;
+        }
 
         public InstallationRecord(string id, string name, InstallMode mode) {
             Object(id: id, name: name, mode: mode, installed_at: (int64)GLib.get_real_time());
@@ -148,7 +283,8 @@ namespace AppManager.Core {
                    custom_web_page != null ||
                    custom_no_display != null ||
                    custom_add_to_path != null ||
-                   (custom_env_vars != null && custom_env_vars.length > 0);
+                   (custom_env_vars != null && custom_env_vars.length > 0) ||
+                   (sandbox_extra_dirs != null && sandbox_extra_dirs.length > 0);
         }
 
         public Json.Node to_json() {
@@ -182,6 +318,14 @@ namespace AppManager.Core {
             builder.add_string_value(version ?? "");
             builder.set_member_name("description");
             builder.add_string_value(description ?? "");
+            builder.set_member_name("appstream_id");
+            builder.add_string_value(appstream_id ?? "");
+            put_bool(builder, "appstream_checked", appstream_checked);
+            builder.set_member_name("apphub_id");
+            builder.add_string_value(apphub_id ?? "");
+            builder.set_member_name("apphub_policy");
+            builder.add_string_value(apphub_policy ?? "");
+            put_bool(builder, "apphub_policy_customized", apphub_policy_customized);
             builder.set_member_name("last_modified");
             builder.add_string_value(last_modified ?? "");
             builder.set_member_name("content_length");
@@ -269,7 +413,11 @@ namespace AppManager.Core {
             builder.add_boolean_value(prerelease_enabled);
             builder.set_member_name("updates_enabled");
             builder.add_boolean_value(updates_enabled);
-            
+
+            // Active sandbox state belongs to the registry. Reinstall history
+            // keeps only explicitly granted special folders.
+            serialize_sandbox(builder);
+
             builder.end_object();
             return builder.get_root();
         }
@@ -328,6 +476,149 @@ namespace AppManager.Core {
                 }
                 builder.end_array();
             }
+            put_array(builder, "sandbox_extra_dirs", sandbox_extra_dirs);
+        }
+
+        private static void put_bool(Json.Builder builder, string key, bool value) {
+            builder.set_member_name(key);
+            builder.add_boolean_value(value);
+        }
+
+        private static bool read_bool(Json.Object obj, string key, bool fallback) {
+            return obj.has_member(key) ? obj.get_boolean_member(key) : fallback;
+        }
+
+        /**
+         * Writes active permissions or an explicit user override, including Off.
+         * Keeping Off and its special folders prevents defaults from undoing it.
+         */
+        private void serialize_sandbox(Json.Builder builder) {
+            if (!sandbox_enabled() && !apphub_policy_customized) {
+                return;
+            }
+            builder.set_member_name("sandbox_profile");
+            builder.add_string_value(sandbox_profile ?? SANDBOX_PROFILE_OFF);
+            put_bool(builder, "sandbox_allow_network", sandbox_allow_network);
+            put_bool(builder, "sandbox_allow_dbus", sandbox_allow_dbus);
+            put_bool(builder, "sandbox_allow_audio", sandbox_allow_audio);
+            put_bool(builder, "sandbox_allow_x11", sandbox_allow_x11);
+            put_bool(builder, "sandbox_allow_gpu", sandbox_allow_gpu);
+            put_bool(builder, "sandbox_allow_camera", sandbox_allow_camera);
+            put_bool(builder, "sandbox_allow_input", sandbox_allow_input);
+            put_bool(builder, "sandbox_allow_bluetooth", sandbox_allow_bluetooth);
+            put_bool(builder, "sandbox_allow_notifications", sandbox_allow_notifications);
+            put_bool(builder, "sandbox_allow_tray", sandbox_allow_tray);
+            put_bool(builder, "sandbox_allow_media_controls", sandbox_allow_media_controls);
+            put_bool(builder, "sandbox_allow_accessibility", sandbox_allow_accessibility);
+            put_array(builder, "sandbox_media_names", sandbox_media_names);
+            put_bool(builder, "sandbox_allow_location", sandbox_allow_location);
+            put_bool(builder, "sandbox_allow_network_info", sandbox_allow_network_info);
+            put_bool(builder, "sandbox_share_processes", sandbox_share_processes);
+            put_bool(builder, "sandbox_share_ipc", sandbox_share_ipc);
+            put_string(builder, "sandbox_display", sandbox_display);
+            put_string(builder, "sandbox_session_bus", sandbox_session_bus);
+            put_string(builder, "sandbox_system_bus", sandbox_system_bus);
+            put_array(builder, "sandbox_read_only_dirs", sandbox_read_only_dirs);
+            put_array(builder, "sandbox_other_dirs", sandbox_other_dirs);
+            put_array(builder, "sandbox_session_rules", sandbox_session_rules);
+            put_array(builder, "sandbox_system_rules", sandbox_system_rules);
+            put_array(builder, "sandbox_extra_devices", sandbox_extra_devices);
+            if (sandbox_app_id != null && sandbox_app_id.strip() != "") {
+                builder.set_member_name("sandbox_app_id");
+                builder.add_string_value(sandbox_app_id);
+            }
+            put_bool(builder, "sandbox_allow_downloads", sandbox_allow_downloads);
+            put_bool(builder, "sandbox_allow_documents", sandbox_allow_documents);
+            put_bool(builder, "sandbox_allow_desktop", sandbox_allow_desktop);
+            put_bool(builder, "sandbox_allow_pictures", sandbox_allow_pictures);
+            put_bool(builder, "sandbox_allow_videos", sandbox_allow_videos);
+            put_bool(builder, "sandbox_allow_music", sandbox_allow_music);
+            if (sandbox_extra_dirs != null && sandbox_extra_dirs.length > 0) {
+                builder.set_member_name("sandbox_extra_dirs");
+                builder.begin_array();
+                foreach (var dir in sandbox_extra_dirs) {
+                    builder.add_string_value(dir);
+                }
+                builder.end_array();
+            }
+        }
+
+        /**
+         * Reads the sandbox block. Absent keys keep their current value, so a
+         * record written by an older version simply stays un-sandboxed.
+         */
+        private static void put_string(Json.Builder builder, string key, string? value) {
+            if (value == null) return;
+            builder.set_member_name(key);
+            builder.add_string_value(value);
+        }
+
+        private static void put_array(Json.Builder builder, string key, string[]? values) {
+            if (values == null || values.length == 0) return;
+            builder.set_member_name(key);
+            builder.begin_array();
+            foreach (var value in values) builder.add_string_value(value);
+            builder.end_array();
+        }
+
+        private static string[]? read_array(Json.Object obj, string key) {
+            if (!obj.has_member(key)) return null;
+            var array = obj.get_array_member(key);
+            var values = new string[array.get_length()];
+            for (uint i = 0; i < array.get_length(); i++) values[i] = array.get_string_element(i);
+            return values;
+        }
+
+        private void deserialize_sandbox(Json.Object obj) {
+            if (!obj.has_member("sandbox_profile")) {
+                return;
+            }
+            var profile = obj.get_string_member("sandbox_profile");
+            sandbox_profile = (profile != null && profile.strip() != "") ? profile : null;
+            sandbox_allow_network    = read_bool(obj, "sandbox_allow_network", sandbox_allow_network);
+            sandbox_allow_dbus       = read_bool(obj, "sandbox_allow_dbus", sandbox_allow_dbus);
+            sandbox_allow_audio      = read_bool(obj, "sandbox_allow_audio", sandbox_allow_audio);
+            sandbox_allow_x11        = read_bool(obj, "sandbox_allow_x11", sandbox_allow_x11);
+            sandbox_allow_gpu        = read_bool(obj, "sandbox_allow_gpu", sandbox_allow_gpu);
+            sandbox_allow_camera     = read_bool(obj, "sandbox_allow_camera", sandbox_allow_camera);
+            sandbox_allow_input      = read_bool(obj, "sandbox_allow_input", sandbox_allow_input);
+            sandbox_allow_bluetooth  = read_bool(obj, "sandbox_allow_bluetooth", sandbox_allow_bluetooth);
+            sandbox_allow_notifications = read_bool(obj, "sandbox_allow_notifications", sandbox_allow_notifications);
+            sandbox_allow_tray       = read_bool(obj, "sandbox_allow_tray", sandbox_allow_tray);
+            // Older records combined tray/media and used implicit legacy a11y/ownership.
+            sandbox_allow_media_controls = read_bool(obj, "sandbox_allow_media_controls", sandbox_allow_tray);
+            sandbox_allow_accessibility = read_bool(obj, "sandbox_allow_accessibility", !obj.has_member("sandbox_session_bus") || sandbox_allow_dbus);
+            sandbox_media_names = read_array(obj, "sandbox_media_names");
+            sandbox_allow_location   = read_bool(obj, "sandbox_allow_location", sandbox_allow_location);
+            sandbox_allow_network_info = read_bool(obj, "sandbox_allow_network_info", false);
+            sandbox_share_processes = read_bool(obj, "sandbox_share_processes", false);
+            sandbox_share_ipc = read_bool(obj, "sandbox_share_ipc", false);
+            sandbox_display = obj.has_member("sandbox_display") ? obj.get_string_member("sandbox_display") : null;
+            sandbox_session_bus = obj.has_member("sandbox_session_bus") ? obj.get_string_member("sandbox_session_bus") : null;
+            sandbox_system_bus = obj.has_member("sandbox_system_bus") ? obj.get_string_member("sandbox_system_bus") : null;
+            sandbox_read_only_dirs = read_array(obj, "sandbox_read_only_dirs");
+            sandbox_other_dirs = read_array(obj, "sandbox_other_dirs");
+            sandbox_session_rules = read_array(obj, "sandbox_session_rules");
+            sandbox_system_rules = read_array(obj, "sandbox_system_rules");
+            sandbox_extra_devices = read_array(obj, "sandbox_extra_devices");
+            if (obj.has_member("sandbox_app_id")) {
+                var app_id = obj.get_string_member("sandbox_app_id");
+                sandbox_app_id = (app_id != null && app_id.strip() != "") ? app_id.strip() : null;
+            }
+            sandbox_allow_downloads  = read_bool(obj, "sandbox_allow_downloads", sandbox_allow_downloads);
+            sandbox_allow_documents  = read_bool(obj, "sandbox_allow_documents", sandbox_allow_documents);
+            sandbox_allow_desktop    = read_bool(obj, "sandbox_allow_desktop", sandbox_allow_desktop);
+            sandbox_allow_pictures   = read_bool(obj, "sandbox_allow_pictures", sandbox_allow_pictures);
+            sandbox_allow_videos     = read_bool(obj, "sandbox_allow_videos", sandbox_allow_videos);
+            sandbox_allow_music      = read_bool(obj, "sandbox_allow_music", sandbox_allow_music);
+            if (obj.has_member("sandbox_extra_dirs")) {
+                var arr = obj.get_array_member("sandbox_extra_dirs");
+                var list = new string[arr.get_length()];
+                for (uint i = 0; i < arr.get_length(); i++) {
+                    list[i] = arr.get_string_element(i);
+                }
+                sandbox_extra_dirs = list;
+            }
         }
 
         /**
@@ -364,6 +655,14 @@ namespace AppManager.Core {
             record.version = version == "" ? null : version;
             var description = obj.get_string_member_with_default("description", "");
             record.description = description == "" ? null : description;
+            var appstream_id = obj.get_string_member_with_default("appstream_id", "");
+            record.appstream_id = appstream_id == "" ? null : appstream_id;
+            record.appstream_checked = read_bool(obj, "appstream_checked", false);
+            var apphub_id = obj.get_string_member_with_default("apphub_id", "");
+            record.apphub_id = apphub_id == "" ? null : apphub_id;
+            var apphub_policy = obj.get_string_member_with_default("apphub_policy", "");
+            record.apphub_policy = apphub_policy == "" ? null : apphub_policy;
+            record.apphub_policy_customized = read_bool(obj, "apphub_policy_customized", false);
             var last_modified = obj.get_string_member_with_default("last_modified", "");
             record.last_modified = last_modified == "" ? null : last_modified;
             record.content_length = (int64)obj.get_int_member_with_default("content_length", 0);
@@ -500,7 +799,8 @@ namespace AppManager.Core {
                 }
                 record.custom_env_vars = env_list;
             }
-            
+            record.deserialize_sandbox(obj);
+
             return record;
         }
 
@@ -550,6 +850,9 @@ namespace AppManager.Core {
                 }
                 custom_env_vars = env_list;
             }
+            // Profiles/toggles from older history must not override fresh defaults
+            // or store templates. Only Special permissions folders are restored.
+            if (sandbox_extra_dirs == null) sandbox_extra_dirs = read_array(obj, "sandbox_extra_dirs");
         }
 
         public static InstallMode parse_mode(string value) {

@@ -64,6 +64,7 @@ namespace AppManager {
 
         // Pending appimg:// download: progress on the icon, nothing installable yet.
         private bool downloading = false;
+        private AppHubPolicy? download_policy;
         private Gtk.ProgressBar? download_progress = null;
         
         // Verification state tracking
@@ -151,8 +152,9 @@ namespace AppManager {
          * normal installer. A checksum matched during the download counts as
          * a successful verification.
          */
-        public void download_completed(string path, bool checksum_verified) {
+        public void download_completed(string path, bool checksum_verified, AppHubPolicy? policy = null) {
             downloading = false;
+            download_policy = policy;
             appimage_path = path;
             clear_download_progress();
 
@@ -631,9 +633,9 @@ namespace AppManager {
             new Thread<void>("appmgr-install", () => {
                 try {
                     if (existing_target != null) {
-                        record = installer.upgrade(staged_copy, existing_target);
+                        record = installer.upgrade(staged_copy, existing_target, download_policy);
                     } else {
-                        record = installer.install(staged_copy, mode);
+                        record = installer.install(staged_copy, mode, download_policy);
                     }
                 } catch (Error e) {
                     error = e;

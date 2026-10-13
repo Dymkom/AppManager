@@ -266,6 +266,22 @@ namespace AppManager.Core {
             }
         }
 
+        // Apply worker metadata only if this exact installation is still current.
+        public void update_appstream_metadata(string id, string path, string checksum,
+                                             int64 installed_at, string? appstream_id) {
+            registry_mutex.lock();
+            var record = records.get(id);
+            if (record != null && !migration_in_progress && !in_flight.contains(id) && !record.appstream_checked
+                && record.installed_path == path && record.source_checksum == checksum
+                && record.installed_at == installed_at) {
+                record.appstream_id = appstream_id;
+                record.appstream_checked = true;
+                SandboxConfig.sync_manifest(record);
+                save_unlocked();
+            }
+            registry_mutex.unlock();
+        }
+
         public void unregister(string id) {
             registry_mutex.lock();
             // Before removing, save custom values for potential reinstall

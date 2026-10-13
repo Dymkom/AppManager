@@ -12,7 +12,7 @@ sudo apt install gettext itstool python3
 sudo dnf install gettext itstool python3
 ```
 
-## Quick Start — Using the Translation Script
+## Quick Start: Using the Translation Script
 
 The script at `scripts/translations.sh` helps you add or update translations
 without needing to touch `.po` files directly.
@@ -24,6 +24,8 @@ This generates a YAML file with all strings that still need translating:
 ```bash
 ./scripts/translations.sh --export lv      # → po/lv.yaml
 ```
+
+Only untranslated strings are exported. Strings marked fuzzy (an older translation that needs review) are not, so fix those directly in the `.po` file.
 
 ### 2. Translate
 
@@ -52,42 +54,49 @@ This validates the `.po` file, merges your translations, and validates again:
 Commit your updated `.po` file and open a pull request.
 
 > **Tip:** If the script reports errors during import, run `./scripts/translations.sh --fix`
-> first to automatically mark broken entries as fuzzy, then try importing again.
+> first, then try importing again. It regenerates the template, merges it into every `.po`
+> file and marks broken entries as fuzzy.
+>
+> `./scripts/translations.sh --check-only` validates all `.po` files without changing anything
+> and prints the statistics below.
 
 ### Adding a new language
 
 To start a translation for a language that doesn't exist yet:
 
 1. Add the language code to `po/LINGUAS` (e.g. `fr`)
-2. Run `./scripts/translations.sh` — it will create the new `.po` from the template
+2. Run `./scripts/translations.sh`. It creates the new `.po` from the template
 3. Then use `--export` / `--import` as described above
+4. Optionally translate the launcher's `GenericName`, `Comment` and `Keywords` by adding `[code]` lines to `data/app-manager.desktop.in`, and add the language name to `LANG_NAMES` in the script
 
 ## Translation Status
 
-| Language | Code | Status |
-| -------- | ---- | ------ |
-| Arabic | ar | 93.1% (298/320) |
-| German | de | 93.1% (298/320) |
-| Greek | el | 93.1% (298/320) |
-| Spanish | es | 93.1% (298/320) |
-| Estonian | et | 93.1% (298/320) |
-| Finnish | fi | 93.1% (298/320) |
-| French | fr | 93.4% (299/320) |
-| Irish | ga | 93.4% (299/320) |
-| Italian | it | 93.1% (298/320) |
-| Japanese | ja | 93.1% (298/320) |
-| Kazakh | kk | 93.1% (298/320) |
-| Korean | ko | 93.1% (298/320) |
-| Lithuanian | lt | 93.1% (298/320) |
-| Latvian | lv | 96.6% (309/320) |
-| Norwegian Bokmål | nb | 93.1% (298/320) |
-| Dutch | nl | 93.1% (298/320) |
-| Polish | pl | 100% (320/320) |
-| Portuguese (Brazil) | pt_BR | 93.1% (298/320) |
-| Swedish | sv | 93.1% (298/320) |
-| Ukrainian | uk | 93.1% (298/320) |
-| Vietnamese | vi | 93.1% (298/320) |
-| Chinese (Simplified) | zh_CN | 93.1% (298/320) |
+Counted with `./scripts/translations.sh --check-only` on 2026-10-05, out of 464 strings.
+
+| Language | Code | Translated | Fuzzy |
+| -------- | ---- | ---------- | ----- |
+| Arabic | ar | 61.9% (287) | 9 |
+| German | de | 61.9% (287) | 9 |
+| Greek | el | 61.9% (287) | 9 |
+| Spanish | es | 78.2% (363) | 0 |
+| Estonian | et | 61.9% (287) | 9 |
+| Finnish | fi | 61.9% (287) | 9 |
+| French | fr | 78.2% (363) | 0 |
+| Irish | ga | 62.3% (289) | 8 |
+| Italian | it | 61.9% (287) | 9 |
+| Japanese | ja | 61.9% (287) | 9 |
+| Kazakh | kk | 61.9% (287) | 9 |
+| Korean | ko | 61.9% (287) | 9 |
+| Lithuanian | lt | 61.9% (287) | 9 |
+| Latvian | lv | 71.1% (330) | 9 |
+| Norwegian Bokmål | nb | 61.9% (287) | 9 |
+| Dutch | nl | 61.9% (287) | 9 |
+| Polish | pl | 66.6% (309) | 0 |
+| Portuguese (Brazil) | pt_BR | 61.9% (287) | 9 |
+| Swedish | sv | 61.9% (287) | 9 |
+| Ukrainian | uk | 62.1% (288) | 8 |
+| Vietnamese | vi | 61.9% (287) | 9 |
+| Chinese (Simplified) | zh_CN | 61.9% (287) | 9 |
 
 ## Note
 
@@ -112,4 +121,4 @@ LANGUAGE=de app-manager
 ## Further Reading
 
 - [GNU gettext Manual](https://www.gnu.org/software/gettext/manual/gettext.html)
-- [Vala i18n documentation](https://wiki.gnome.org/Projects/Vala/TranslationSample)
+- [Meson i18n module](https://mesonbuild.com/i18n-module.html)

@@ -18,26 +18,24 @@ namespace AppManager {
         private HashSet<string> notified_stale_dirs = new HashSet<string>();
         // Temp dirs holding appimg:// downloads, removed on shutdown
         private HashSet<string> appimg_download_dirs = new HashSet<string>();
+        private HashMap<string, AppHubPolicy> appimg_policies = new HashMap<string, AppHubPolicy>();
         private static bool opt_version = false;
         private static bool opt_help = false;
         private static bool opt_background_update = false;
         private static bool opt_update_all = false;
         private static bool opt_update_check = false;
-        private static string? opt_install = null;
-        private static string? opt_uninstall = null;
-        private static string? opt_is_installed = null;
-        private static bool opt_keep_both = false;
-
+        // Options read by command_line() take a null arg_data: only then does GApplication
+        // pack them into the options dict that reaches the primary instance.
         private const OptionEntry[] options = {
             { "help", 'h', 0, OptionArg.NONE, ref opt_help, "Show help options", null },
             { "version", 0, 0, OptionArg.NONE, ref opt_version, "Display version number", null },
             { "background-update", 0, 0, OptionArg.NONE, ref opt_background_update, "Run background update check", null },
             { "update-all", 0, 0, OptionArg.NONE, ref opt_update_all, "Update all installed apps and exit", null },
             { "update-check", 0, 0, OptionArg.NONE, ref opt_update_check, "List available updates and exit", null },
-            { "install", 0, OptionFlags.HIDDEN, OptionArg.FILENAME, ref opt_install, null, "PATH" },
-            { "keep-both", 0, 0, OptionArg.NONE, ref opt_keep_both, "With install: keep the existing app and install side by side", null },
-            { "uninstall", 0, OptionFlags.HIDDEN, OptionArg.STRING, ref opt_uninstall, null, "PATH" },
-            { "is-installed", 0, 0, OptionArg.FILENAME, ref opt_is_installed, "Check if an AppImage is installed", "PATH" },
+            { "install", 0, OptionFlags.HIDDEN, OptionArg.FILENAME, null, null, "PATH" },
+            { "keep-both", 0, 0, OptionArg.NONE, null, "With install: keep the existing app and install side by side", null },
+            { "uninstall", 0, OptionFlags.HIDDEN, OptionArg.STRING, null, null, "PATH" },
+            { "is-installed", 0, 0, OptionArg.FILENAME, null, "Check if an AppImage is installed", "PATH" },
             { null }
         };
         
@@ -47,14 +45,23 @@ namespace AppManager {
             settings = new Settings(Core.APPLICATION_ID);
             registry = new InstallationRegistry();
             installer = new Installer(registry, settings);
-            
+            // What a permission implies changes as app compatibility issues are found, and
+            // a record's manifest is otherwise only rewritten when its permissions change.
+            // Refreshing them here keeps already-sandboxed apps from being stuck on a
+            // manifest that a newer AppManager knows is wrong.
+            // A newly assigned sandbox app id has to be saved, or it would be
+            // generated again on the next start and the permissions keyed by it lost.
+            if (Core.SandboxConfig.refresh_all(registry.list())) {
+                registry.persist(false);
+            }
+
             add_main_option_entries(options);
             set_option_context_parameter_string("[FILE...]");
             set_option_context_summary("AppImage Manager - Manage and update AppImages on your system");
             set_option_context_description("""Commands:
   install PATH                Install an AppImage from PATH
-  uninstall PATH              Uninstall an AppImage (by path or checksum)
-  update PATH                 Update an installed AppImage (by path or checksum)
+  uninstall PATH              Uninstall an AppImage (by path)
+  update PATH                 Update an installed AppImage (by path)
 """);
         }
 
@@ -65,8 +72,8 @@ namespace AppManager {
 
 Commands:
   install PATH                Install an AppImage from PATH
-  uninstall PATH              Uninstall an AppImage (by path or checksum)
-  update PATH                 Update an installed AppImage (by path or checksum)
+  uninstall PATH              Uninstall an AppImage (by path)
+  update PATH                 Update an installed AppImage (by path)
 
 Options:
   -h, --help                  Show help options
@@ -172,6 +179,38 @@ Examples:
             return -1;  // Continue processing
         }
 
+        private async void backfill_appstream_metadata() {
+            hold();
+            foreach (var record in registry.list()) {
+                if (record.appstream_checked || record.mode != InstallMode.PORTABLE) continue;
+                var id = record.id;
+                var path = record.installed_path;
+                var checksum = record.source_checksum;
+                var installed_at = record.installed_at;
+                string? appstream_id = null;
+                bool examined = false;
+                SourceFunc callback = backfill_appstream_metadata.callback;
+                new Thread<void>("appstream-backfill", () => {
+                    string? temp = null;
+                    try {
+                        temp = Utils.FileUtils.create_temp_dir("appstream-");
+                        var desktop = AppImageAssets.extract_desktop_entry(path, temp);
+                        var entry = new DesktopEntry(desktop);
+                        appstream_id = AppImageAssets.extract_appstream_id(path, temp, Path.get_basename(desktop), entry.name);
+                        examined = true;
+                    } catch (Error e) {
+                        debug("AppStream backfill for %s failed: %s", path, e.message);
+                    } finally {
+                        if (temp != null) Utils.FileUtils.remove_dir_recursive(temp);
+                    }
+                    Idle.add((owned) callback);
+                });
+                yield;
+                if (examined) registry.update_appstream_metadata(id, path, checksum, installed_at, appstream_id);
+            }
+            release();
+        }
+
         protected override void startup() {
             base.startup();
 
@@ -210,6 +249,7 @@ Examples:
                 }
             });
             directory_monitor.start();
+            backfill_appstream_metadata.begin();
             
             var quit_action = new GLib.SimpleAction("quit", null);
             quit_action.activate.connect(() => this.quit());
@@ -429,6 +469,7 @@ Examples:
         }
 
         private string appimg_progress_text(AppimgLink link) {
+            if (link.checking_policy) return _("Checking AppHub sandbox policy…");
             var received = link.received_bytes;
             var total = link.total_bytes;
             if (total > 0) {
@@ -475,11 +516,13 @@ Examples:
                 } else if (!cancelled) {
                     present_appimg_error(_("Download failed"), error.message);
                 }
-            } else if (window != null) {
-                window.download_completed(downloaded_path, link.sha256 != null);
             } else {
-                // The same window continues as the install prompt.
-                show_quick_install_dialog(downloaded_path, dialog);
+                if (link.sandbox_policy != null) appimg_policies.set(downloaded_path, link.sandbox_policy);
+                if (window != null) {
+                    window.download_completed(downloaded_path, link.sha256 != null || link.sandbox_policy != null, link.sandbox_policy);
+                } else {
+                    show_quick_install_dialog(downloaded_path, dialog);
+                }
             }
 
             this.release();
@@ -772,13 +815,14 @@ Examples:
             InstallationRecord? record = null;
             Error? error = null;
             bool upgraded = (existing != null);
+            var download_policy = appimg_policies.get(appimage_path);
 
             new Thread<void>("appmgr-quick-install", () => {
                 try {
                     if (existing != null) {
-                        record = installer.upgrade(staged_path, existing);
+                        record = installer.upgrade(staged_path, existing, download_policy);
                     } else {
-                        record = installer.install(staged_path, mode);
+                        record = installer.install(staged_path, mode, download_policy);
                     }
                 } catch (Error e) {
                     error = e;
@@ -981,7 +1025,7 @@ Examples:
             Idle.add(() => {
                 var dialog = new Adw.AlertDialog(
                     _("Leftover portable folder found"),
-                    _("A leftover portable folder was found next to AppManager (%s). AppManager does not support portable mode for itself. The folder may contain apps installed while this bug was active — move anything you need out of it (e.g. AppImages under its Applications subfolder), then delete it.").printf(dir)
+                    _("A leftover portable folder was found next to AppManager (%s). AppManager does not support portable mode for itself. The folder may contain apps installed while this bug was active - move anything you need out of it (e.g. AppImages under its Applications subfolder), then delete it.").printf(dir)
                 );
                 dialog.add_response("ignore", _("Ignore"));
                 dialog.add_response("trash", _("Move to Trash"));
@@ -1286,6 +1330,7 @@ Examples:
                     if (restored_path != null && restored_path.strip() != "") {
                         restore_trashed_portable_folder("%s.home".printf(restored_path));
                         restore_trashed_portable_folder("%s.config".printf(restored_path));
+                        restore_trashed_portable_folder("%s.sandbox".printf(restored_path));
                     }
                 } catch (Error e) {
                     error = e;

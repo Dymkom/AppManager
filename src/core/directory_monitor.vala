@@ -43,7 +43,7 @@ namespace AppManager.Core {
                 );
                 applications_monitor.changed.connect(on_applications_changed);
                 
-                // Monitor ~/Applications/.extracted directory
+                // Monitor ~/Applications/.installed directory
                 var extracted_dir = File.new_for_path(AppPaths.extracted_root);
                 extracted_monitor = extracted_dir.monitor_directory(
                     FileMonitorFlags.NONE,
